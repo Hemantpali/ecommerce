@@ -25,6 +25,15 @@ const shippingAddressSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const paymentResultSchema = new mongoose.Schema(
+  {
+    razorpayOrderId: { type: String },
+    razorpayPaymentId: { type: String },
+    razorpaySignature: { type: String },
+  },
+  { _id: false }
+);
+
 const orderSchema = new mongoose.Schema(
   {
     user: {
@@ -79,6 +88,9 @@ const orderSchema = new mongoose.Schema(
     },
     paidAt: {
       type: Date,
+    },
+    paymentResult: {
+      type: paymentResultSchema,
     },
     isDelivered: {
       type: Boolean,

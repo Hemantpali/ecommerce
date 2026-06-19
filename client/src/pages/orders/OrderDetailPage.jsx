@@ -71,6 +71,12 @@ const OrderDetailPage = () => {
                   <span>{formatDate(order.paidAt)}</span>
                 </div>
               )}
+              {order.paymentResult?.razorpayPaymentId && (
+                <div className="flex justify-between gap-4">
+                  <span className="text-slate-500">Payment ID</span>
+                  <span className="break-all text-right">{order.paymentResult.razorpayPaymentId}</span>
+                </div>
+              )}
             </div>
           </div>
 

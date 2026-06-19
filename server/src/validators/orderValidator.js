@@ -28,6 +28,13 @@ const createOrderRules = [
 
 const orderIdRules = [param('id').isMongoId().withMessage('Invalid order ID')];
 
+const verifyRazorpayPaymentRules = [
+  param('id').isMongoId().withMessage('Invalid order ID'),
+  body('razorpayOrderId').trim().notEmpty().withMessage('Razorpay order ID is required'),
+  body('razorpayPaymentId').trim().notEmpty().withMessage('Razorpay payment ID is required'),
+  body('razorpaySignature').trim().notEmpty().withMessage('Razorpay signature is required'),
+];
+
 const updateOrderStatusRules = [
   param('id').isMongoId().withMessage('Invalid order ID'),
   body('status')
@@ -60,4 +67,5 @@ module.exports = {
   updateOrderStatusRules,
   listOrdersRules,
   createOrderFromCartRules,
+  verifyRazorpayPaymentRules,
 };

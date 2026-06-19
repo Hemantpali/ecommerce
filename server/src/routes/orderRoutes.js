@@ -6,6 +6,8 @@ const {
   getOrderById,
   getAllOrders,
   updateOrderToPaid,
+  createRazorpayPaymentOrder,
+  verifyRazorpayPayment,
   updateOrderStatus,
 } = require('../controllers/orderController');
 const { protect } = require('../middleware/authMiddleware');
@@ -17,6 +19,7 @@ const {
   orderIdRules,
   updateOrderStatusRules,
   listOrdersRules,
+  verifyRazorpayPaymentRules,
 } = require('../validators/orderValidator');
 
 const router = express.Router();
@@ -28,6 +31,8 @@ router.post('/from-cart', createOrderFromCartRules, validate, createOrderFromCar
 router.get('/my', getMyOrders);
 router.get('/', admin, listOrdersRules, validate, getAllOrders);
 router.get('/:id', orderIdRules, validate, getOrderById);
+router.post('/:id/razorpay/order', orderIdRules, validate, createRazorpayPaymentOrder);
+router.post('/:id/razorpay/verify', verifyRazorpayPaymentRules, validate, verifyRazorpayPayment);
 router.put('/:id/pay', orderIdRules, validate, updateOrderToPaid);
 router.put('/:id/status', admin, updateOrderStatusRules, validate, updateOrderStatus);
 
