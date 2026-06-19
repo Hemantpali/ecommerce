@@ -28,10 +28,11 @@ const createRazorpayOrder = async ({ amount, currency = 'INR', receipt, notes })
     }),
   });
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new AppError(data.error?.description || 'Failed to create Razorpay order', response.status);
+    const upstreamStatus = response.status === 401 || response.status === 403 ? 502 : response.status;
+    throw new AppError(data.error?.description || 'Failed to create Razorpay order', upstreamStatus);
   }
 
   return data;
