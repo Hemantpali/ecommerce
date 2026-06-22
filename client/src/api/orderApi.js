@@ -8,4 +8,6 @@ export const orderApi = {
   getAllOrders: (params) => api.get('/orders', { params }),
   updateOrderStatus: (id, status) => api.put(`/orders/${id}/status`, { status }),
   payOrder: (id) => api.put(`/orders/${id}/pay`),
+  createRazorpayOrder: (id) => api.post(`/orders/${id}/razorpay/order`),
+  verifyRazorpayPayment: (id, data) => api.post(`/orders/${id}/razorpay/verify`, data),
 };
