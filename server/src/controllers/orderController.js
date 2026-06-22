@@ -4,6 +4,11 @@ const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const { sendSuccess, sendCreated } = require('../utils/apiResponse');
 const { clearUserCart, getOrCreateCart, populateCart } = require('../utils/cartHelpers');
+const {
+  createRazorpayOrder,
+  razorpayKeyId,
+  verifyRazorpaySignature,
+} = require('../utils/razorpay');
 
 const buildOrderItems = async (orderItemsInput) => {
   const orderItems = [];
@@ -166,6 +171,93 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
   sendSuccess(res, updatedOrder, 'Order marked as paid');
 });
 
+const createRazorpayPaymentOrder = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    throw new AppError('Order not found', 404);
+  }
+
+  if (order.user.toString() !== req.user._id.toString()) {
+    throw new AppError('Not authorized to pay this order', 403);
+  }
+
+  if (order.isPaid) {
+    throw new AppError('Order is already paid', 400);
+  }
+
+  const razorpayOrder = await createRazorpayOrder({
+    amount: order.totalPrice,
+    receipt: `order_${order._id.toString().slice(-24)}`,
+    notes: {
+      appOrderId: order._id.toString(),
+      userId: req.user._id.toString(),
+    },
+  });
+
+  order.paymentResult = {
+    razorpayOrderId: razorpayOrder.id,
+  };
+  await order.save();
+
+  sendSuccess(res, {
+    key: razorpayKeyId,
+    razorpayOrder,
+    order: {
+      id: order._id,
+      totalPrice: order.totalPrice,
+      currency: razorpayOrder.currency,
+    },
+  });
+});
+
+const verifyRazorpayPayment = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    throw new AppError('Order not found', 404);
+  }
+
+  if (order.user.toString() !== req.user._id.toString()) {
+    throw new AppError('Not authorized to pay this order', 403);
+  }
+
+  if (order.isPaid) {
+    throw new AppError('Order is already paid', 400);
+  }
+
+  const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+
+  if (
+    order.paymentResult?.razorpayOrderId
+    && order.paymentResult.razorpayOrderId !== razorpayOrderId
+  ) {
+    throw new AppError('Razorpay order ID does not match this order', 400);
+  }
+
+  const isValid = verifyRazorpaySignature({
+    razorpayOrderId,
+    razorpayPaymentId,
+    razorpaySignature,
+  });
+
+  if (!isValid) {
+    throw new AppError('Invalid Razorpay payment signature', 400);
+  }
+
+  order.isPaid = true;
+  order.paidAt = Date.now();
+  order.status = 'processing';
+  order.paymentResult = {
+    razorpayOrderId,
+    razorpayPaymentId,
+    razorpaySignature,
+  };
+
+  const updatedOrder = await order.save();
+  sendSuccess(res, updatedOrder, 'Payment verified successfully');
+});
+
 const updateOrderStatus = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
@@ -204,5 +296,7 @@ module.exports = {
   getOrderById,
   getAllOrders,
   updateOrderToPaid,
+  createRazorpayPaymentOrder,
+  verifyRazorpayPayment,
   updateOrderStatus,
 };

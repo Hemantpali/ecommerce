@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import { orderApi } from '../../api/orderApi';
 import { formatPrice } from '../../utils/formatPrice';
 import Loader from '../../components/common/Loader';
@@ -9,6 +10,7 @@ import { ROUTES } from '../../constants/routes';
 
 const CheckoutPage = () => {
   const { items, subtotal, shipping, tax, total, loading, clearCart } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -17,7 +19,7 @@ const CheckoutPage = () => {
     city: '',
     postalCode: '',
     country: '',
-    paymentMethod: 'PayPal',
+    paymentMethod: 'Razorpay',
   });
 
   if (loading) return <Loader fullScreen />;
@@ -32,6 +34,70 @@ const CheckoutPage = () => {
       </div>
     );
   }
+
+  const loadRazorpayScript = () =>
+    new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+
+  const startRazorpayPayment = async (orderId) => {
+    const isLoaded = await loadRazorpayScript();
+
+    if (!isLoaded) {
+      throw new Error('Unable to load Razorpay checkout. Please check your connection and try again.');
+    }
+
+    const { data } = await orderApi.createRazorpayOrder(orderId);
+    const { key, razorpayOrder } = data.data;
+
+    return new Promise((resolve, reject) => {
+      const razorpay = new window.Razorpay({
+        key,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+        name: 'Ecommerce Store',
+        description: `Order #${orderId.slice(-8).toUpperCase()}`,
+        order_id: razorpayOrder.id,
+        prefill: {
+          name: user?.name || '',
+          email: user?.email || '',
+        },
+        theme: {
+          color: '#2563eb',
+        },
+        handler: async (response) => {
+          try {
+            await orderApi.verifyRazorpayPayment(orderId, {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            });
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        },
+        modal: {
+          ondismiss: () => reject(new Error('Payment was cancelled')),
+        },
+      });
+
+      razorpay.on('payment.failed', (response) => {
+        reject(new Error(response.error?.description || 'Razorpay payment failed'));
+      });
+
+      razorpay.open();
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,7 +117,10 @@ const CheckoutPage = () => {
         shippingPrice: shipping,
       });
 
-      await orderApi.payOrder(data.data._id);
+      if (form.paymentMethod === 'Razorpay') {
+        await startRazorpayPayment(data.data._id);
+      }
+
       await clearCart();
       navigate(`/orders/${data.data._id}`);
     } catch (err) {
@@ -95,10 +164,16 @@ const CheckoutPage = () => {
               onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
               className="input-field"
             >
+              <option value="Razorpay">Razorpay</option>
               <option value="PayPal">PayPal</option>
               <option value="Credit Card">Credit Card</option>
               <option value="Cash on Delivery">Cash on Delivery</option>
             </select>
+            {form.paymentMethod !== 'Razorpay' && (
+              <p className="mt-2 text-xs text-slate-500">
+                This method will place an unpaid order for admin follow-up.
+              </p>
+            )}
           </div>
         </div>
 
