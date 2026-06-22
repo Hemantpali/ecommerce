@@ -7,4 +7,5 @@ export const productApi = {
   createProduct: (data) => api.post('/products', data),
   updateProduct: (id, data) => api.put(`/products/${id}`, data),
   deleteProduct: (id) => api.delete(`/products/${id}`),
+  createReview: (id, data) => api.post(`/products/${id}/reviews`, data),
 };
