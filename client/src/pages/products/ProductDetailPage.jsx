@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { productApi } from '../../api/productApi';
 import { useCart } from '../../context/CartContext';
@@ -11,7 +11,7 @@ import { ROUTES } from '../../constants/routes';
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { addToCart, updating } = useCart();
   const [product, setProduct] = useState(null);
   const [qty, setQty] = useState(1);
@@ -19,27 +19,23 @@ const ProductDetailPage = () => {
   const [error, setError] = useState('');
   const [cartError, setCartError] = useState('');
   const [added, setAdded] = useState(false);
-  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
-  const [reviewSubmitting, setReviewSubmitting] = useState(false);
-  const [reviewError, setReviewError] = useState('');
-  const [reviewSuccess, setReviewSuccess] = useState('');
-
-  const fetchProduct = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const { data } = await productApi.getProduct(id);
-      setProduct(data.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Product not found');
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
 
   useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const { data } = await productApi.getProduct(id);
+        setProduct(data.data);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Product not found');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchProduct();
-  }, [fetchProduct]);
+  }, [id]);
 
   const handleAddToCart = async () => {
     setCartError('');
@@ -59,30 +55,6 @@ const ProductDetailPage = () => {
       } else {
         setCartError(err.response?.data?.message || 'Failed to add to cart');
       }
-    }
-  };
-
-  const handleReviewSubmit = async (e) => {
-    e.preventDefault();
-    setReviewError('');
-    setReviewSuccess('');
-
-    if (!isAuthenticated) {
-      navigate(ROUTES.LOGIN, { state: { from: { pathname: `/products/${id}` } } });
-      return;
-    }
-
-    setReviewSubmitting(true);
-
-    try {
-      const { data } = await productApi.createReview(id, reviewForm);
-      setProduct(data.data);
-      setReviewForm({ rating: 5, comment: '' });
-      setReviewSuccess('Review submitted successfully');
-    } catch (err) {
-      setReviewError(err.response?.data?.message || 'Failed to submit review');
-    } finally {
-      setReviewSubmitting(false);
     }
   };
 
@@ -121,13 +93,11 @@ const ProductDetailPage = () => {
 
           <div className="mt-4 flex items-center gap-4">
             <span className="text-3xl font-bold text-slate-900">{formatPrice(product.price)}</span>
-            <span className="text-sm text-slate-500">
-              <span className="text-yellow-500">{'★'.repeat(Math.round(product.rating || 0))}</span>
-              <span className="text-slate-300">{'★'.repeat(5 - Math.round(product.rating || 0))}</span>
-              {' '}
-              {product.rating > 0 ? product.rating.toFixed(1) : 'No ratings yet'} ({product.numReviews || 0}{' '}
-              reviews)
-            </span>
+            {product.rating > 0 && (
+              <span className="text-sm text-slate-500">
+                ★ {product.rating.toFixed(1)} ({product.numReviews} reviews)
+              </span>
+            )}
           </div>
 
           <p className="mt-6 leading-relaxed text-slate-600">{product.description}</p>
@@ -183,87 +153,6 @@ const ProductDetailPage = () => {
           )}
         </div>
       </div>
-
-      <section className="mt-10 grid gap-8 lg:grid-cols-[1fr_380px]">
-        <div className="card p-6">
-          <h2 className="text-xl font-semibold text-slate-900">Customer Reviews</h2>
-          {product.reviews?.length ? (
-            <div className="mt-6 space-y-5">
-              {product.reviews.map((review) => (
-                <article key={review._id} className="border-b border-slate-200 pb-5 last:border-0 last:pb-0">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                      <p className="font-medium text-slate-900">{review.name}</p>
-                      <p className="text-sm text-yellow-500">
-                        {'★'.repeat(review.rating)}
-                        <span className="text-slate-300">{'★'.repeat(5 - review.rating)}</span>
-                      </p>
-                    </div>
-                    <time className="text-xs text-slate-500">
-                      {new Date(review.createdAt).toLocaleDateString()}
-                    </time>
-                  </div>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{review.comment}</p>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">No reviews yet. Be the first to review this product.</p>
-          )}
-        </div>
-
-        <div className="card h-fit p-6">
-          <h2 className="text-xl font-semibold text-slate-900">Write a Review</h2>
-          {!isAuthenticated ? (
-            <p className="mt-4 text-sm text-slate-500">
-              <Link to={ROUTES.LOGIN} className="text-brand-600 hover:underline">
-                Sign in
-              </Link>{' '}
-              to write a review.
-            </p>
-          ) : product.reviews?.some((review) => review.user === user?._id || review.user?._id === user?._id) ? (
-            <p className="mt-4 rounded-lg bg-brand-50 p-3 text-sm text-brand-700">
-              You already reviewed this product.
-            </p>
-          ) : (
-            <form onSubmit={handleReviewSubmit} className="mt-5 space-y-4">
-              {reviewError && <Alert message={reviewError} />}
-              {reviewSuccess && (
-                <div className="rounded-lg bg-green-50 p-3 text-sm text-green-700">{reviewSuccess}</div>
-              )}
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">Rating</label>
-                <select
-                  value={reviewForm.rating}
-                  onChange={(e) => setReviewForm({ ...reviewForm, rating: Number(e.target.value) })}
-                  className="input-field"
-                >
-                  <option value={5}>5 - Excellent</option>
-                  <option value={4}>4 - Very good</option>
-                  <option value={3}>3 - Good</option>
-                  <option value={2}>2 - Fair</option>
-                  <option value={1}>1 - Poor</option>
-                </select>
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">Comment</label>
-                <textarea
-                  required
-                  rows={4}
-                  maxLength={1000}
-                  value={reviewForm.comment}
-                  onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
-                  className="input-field"
-                  placeholder="Share your experience with this product..."
-                />
-              </div>
-              <button type="submit" disabled={reviewSubmitting} className="btn-primary w-full">
-                {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
-              </button>
-            </form>
-          )}
-        </div>
-      </section>
     </div>
   );
 };

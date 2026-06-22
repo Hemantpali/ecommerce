@@ -59,21 +59,6 @@ const updateProductRules = [
 
 const productIdRules = [param('id').isMongoId().withMessage('Invalid product ID')];
 
-const createReviewRules = [
-  param('id').isMongoId().withMessage('Invalid product ID'),
-  body('rating')
-    .notEmpty()
-    .withMessage('Rating is required')
-    .isInt({ min: 1, max: 5 })
-    .withMessage('Rating must be between 1 and 5'),
-  body('comment')
-    .trim()
-    .notEmpty()
-    .withMessage('Review comment is required')
-    .isLength({ max: 1000 })
-    .withMessage('Review comment cannot exceed 1000 characters'),
-];
-
 const listProductsRules = [
   query('keyword').optional().trim().isLength({ max: 100 }).withMessage('Keyword too long'),
   query('category').optional().trim().isLength({ max: 50 }).withMessage('Category too long'),
@@ -89,5 +74,4 @@ module.exports = {
   updateProductRules,
   productIdRules,
   listProductsRules,
-  createReviewRules,
 };
