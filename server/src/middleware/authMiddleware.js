@@ -5,7 +5,7 @@ const User = require('../models/User');
 const { jwtSecret } = require('../config/env');
 
 const extractToken = (req) => {
-  if (req.headers.authorization?.startsWith('Bearer')) {
+  if (req.headers.authorization?.startsWith('Bearer ')) {
     return req.headers.authorization.split(' ')[1];
   }
   return null;
