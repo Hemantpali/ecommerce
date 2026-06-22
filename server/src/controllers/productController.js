@@ -120,36 +120,6 @@ const deleteProduct = asyncHandler(async (req, res) => {
   sendSuccess(res, null, 'Product removed successfully');
 });
 
-const createProductReview = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id);
-
-  if (!product) {
-    throw new AppError('Product not found', 404);
-  }
-
-  const alreadyReviewed = product.reviews.some(
-    (review) => review.user.toString() === req.user._id.toString()
-  );
-
-  if (alreadyReviewed) {
-    throw new AppError('Product already reviewed', 400);
-  }
-
-  product.reviews.push({
-    user: req.user._id,
-    name: req.user.name,
-    rating: Number(req.body.rating),
-    comment: req.body.comment,
-  });
-
-  product.numReviews = product.reviews.length;
-  product.rating =
-    product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length;
-
-  const updatedProduct = await product.save();
-  sendCreated(res, updatedProduct, 'Review added successfully');
-});
-
 const getCategories = asyncHandler(async (_req, res) => {
   const categories = await Product.distinct('category');
   sendSuccess(res, categories.sort());
@@ -161,6 +131,5 @@ module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
-  createProductReview,
   getCategories,
 };
