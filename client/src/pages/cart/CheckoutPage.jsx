@@ -60,6 +60,21 @@ const CheckoutPage = () => {
     const { key, razorpayOrder } = data.data;
 
     return new Promise((resolve, reject) => {
+      let paymentCompleted = false;
+
+      const verifyPayment = async (response) => {
+        try {
+          await orderApi.verifyRazorpayPayment(orderId, {
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          });
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      };
+
       const razorpay = new window.Razorpay({
         key,
         amount: razorpayOrder.amount,
@@ -74,20 +89,16 @@ const CheckoutPage = () => {
         theme: {
           color: '#2563eb',
         },
-        handler: async (response) => {
-          try {
-            await orderApi.verifyRazorpayPayment(orderId, {
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-            });
-            resolve();
-          } catch (err) {
-            reject(err);
-          }
+        handler: function (response) {
+          paymentCompleted = true;
+          verifyPayment(response);
         },
         modal: {
-          ondismiss: () => reject(new Error('Payment was cancelled')),
+          ondismiss: () => {
+            if (!paymentCompleted) {
+              reject(new Error('Payment was cancelled'));
+            }
+          },
         },
       });
 
@@ -124,7 +135,7 @@ const CheckoutPage = () => {
       await clearCart();
       navigate(`/orders/${data.data._id}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Checkout failed');
+      setError(err.response?.data?.message || err.message || 'Checkout failed');
     } finally {
       setSubmitting(false);
     }
