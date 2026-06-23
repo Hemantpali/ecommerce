@@ -5,6 +5,7 @@ const {
   createProduct,
   updateProduct,
   deleteProduct,
+  createProductReview,
   getCategories,
 } = require('../controllers/productController');
 const { protect } = require('../middleware/authMiddleware');
@@ -15,6 +16,7 @@ const {
   updateProductRules,
   productIdRules,
   listProductsRules,
+  createReviewRules,
 } = require('../validators/productValidator');
 
 const router = express.Router();
@@ -22,6 +24,7 @@ const router = express.Router();
 router.get('/', listProductsRules, validate, getProducts);
 router.get('/categories', getCategories);
 router.get('/:id', productIdRules, validate, getProductById);
+router.post('/:id/reviews', protect, createReviewRules, validate, createProductReview);
 
 router.post('/', protect, admin, createProductRules, validate, createProduct);
 router.put('/:id', protect, admin, updateProductRules, validate, updateProduct);
