@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { orderApi } from '../../api/orderApi';
+import { couponApi } from '../../api/couponApi';
 import { formatPrice } from '../../utils/formatPrice';
 import Loader from '../../components/common/Loader';
 import Alert from '../../components/common/Alert';
@@ -14,6 +15,10 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [form, setForm] = useState({
     address: '',
     city: '',
@@ -110,13 +115,42 @@ const CheckoutPage = () => {
     });
   };
 
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+
+    setCouponError('');
+    setValidatingCoupon(true);
+
+    try {
+      const { data } = await couponApi.validateCoupon({
+        code: couponCode.trim(),
+        orderAmount: subtotal,
+      });
+      setAppliedCoupon(data.data);
+      setCouponCode('');
+    } catch (err) {
+      setCouponError(err.response?.data?.message || 'Invalid coupon code');
+      setAppliedCoupon(null);
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError('');
+  };
+
+  const discountAmount = appliedCoupon?.discountAmount || 0;
+  const totalAfterDiscount = total - discountAmount;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
 
     try {
-      const { data } = await orderApi.createOrderFromCart({
+      const orderPayload = {
         shippingAddress: {
           address: form.address,
           city: form.city,
@@ -126,7 +160,13 @@ const CheckoutPage = () => {
         paymentMethod: form.paymentMethod,
         taxPrice: tax,
         shippingPrice: shipping,
-      });
+      };
+
+      if (appliedCoupon) {
+        orderPayload.couponCode = appliedCoupon.coupon.code;
+      }
+
+      const { data } = await orderApi.createOrderFromCart(orderPayload);
 
       if (form.paymentMethod === 'Razorpay') {
         await startRazorpayPayment(data.data._id);
@@ -199,6 +239,49 @@ const CheckoutPage = () => {
                 <span>{formatPrice(item.lineTotal || item.price * item.qty)}</span>
               </div>
             ))}
+
+            <div className="border-t border-slate-200 pt-3">
+              <div className="flex items-center gap-2">
+                <input
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  placeholder="Coupon code"
+                  className="input-field flex-1"
+                  disabled={!!appliedCoupon}
+                />
+                {appliedCoupon ? (
+                  <button
+                    type="button"
+                    onClick={handleRemoveCoupon}
+                    className="btn-secondary shrink-0 px-3 py-2 text-xs"
+                  >
+                    Remove
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleApplyCoupon}
+                    disabled={validatingCoupon || !couponCode.trim()}
+                    className="btn-primary shrink-0 px-3 py-2 text-xs"
+                  >
+                    {validatingCoupon ? '...' : 'Apply'}
+                  </button>
+                )}
+              </div>
+              {couponError && (
+                <p className="mt-1 text-xs text-red-500">{couponError}</p>
+              )}
+              {appliedCoupon && (
+                <p className="mt-1 text-xs text-green-600">
+                  {appliedCoupon.coupon.type === 'percentage'
+                    ? `${appliedCoupon.coupon.value}% off`
+                    : `${formatPrice(appliedCoupon.coupon.value)} off`}
+                  {' — '}
+                  You save {formatPrice(discountAmount)}
+                </p>
+              )}
+            </div>
+
             <div className="space-y-2 border-t border-slate-200 pt-3">
               <div className="flex justify-between">
                 <span className="text-slate-500">Subtotal</span>
@@ -212,9 +295,15 @@ const CheckoutPage = () => {
                 <span className="text-slate-500">Tax</span>
                 <span>{formatPrice(tax)}</span>
               </div>
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span>Discount</span>
+                  <span>-{formatPrice(discountAmount)}</span>
+                </div>
+              )}
               <div className="flex justify-between font-bold">
                 <span>Total</span>
-                <span>{formatPrice(total)}</span>
+                <span>{formatPrice(totalAfterDiscount)}</span>
               </div>
             </div>
           </div>
