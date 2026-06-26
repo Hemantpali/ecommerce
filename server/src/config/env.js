@@ -17,4 +17,7 @@ module.exports = {
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
   razorpayKeyId: process.env.RAZORPAY_KEY_ID,
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET,
+  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
+  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
 };
