@@ -2,11 +2,13 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 import { ROUTES } from '../../constants/routes';
 
 const Navbar = () => {
   const { user, logout, isAdmin } = useAuth();
   const { cartCount } = useCart();
+  const { wishlistCount } = useWishlist();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -31,9 +33,14 @@ const Navbar = () => {
             Shop
           </NavLink>
           {user && (
-            <NavLink to={ROUTES.ORDERS} className={navLinkClass}>
-              Orders
-            </NavLink>
+            <>
+              <NavLink to={ROUTES.WISHLIST} className={navLinkClass}>
+                Wishlist
+              </NavLink>
+              <NavLink to={ROUTES.ORDERS} className={navLinkClass}>
+                Orders
+              </NavLink>
+            </>
           )}
           {isAdmin && (
             <NavLink to={ROUTES.ADMIN} className={navLinkClass}>
@@ -43,6 +50,21 @@ const Navbar = () => {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          {user && (
+            <Link
+              to={ROUTES.WISHLIST}
+              className="relative rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 hover:text-red-500"
+              aria-label="Wishlist"
+            >
+              <span className="text-2xl leading-none">♡</span>
+              {wishlistCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+          )}
+
           <Link
             to={ROUTES.CART}
             className="relative rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 hover:text-brand-600"
@@ -106,9 +128,14 @@ const Navbar = () => {
               Cart ({cartCount})
             </NavLink>
             {user && (
-              <NavLink to={ROUTES.ORDERS} className={navLinkClass} onClick={() => setMenuOpen(false)}>
-                Orders
-              </NavLink>
+              <>
+                <NavLink to={ROUTES.WISHLIST} className={navLinkClass} onClick={() => setMenuOpen(false)}>
+                  Wishlist ({wishlistCount})
+                </NavLink>
+                <NavLink to={ROUTES.ORDERS} className={navLinkClass} onClick={() => setMenuOpen(false)}>
+                  Orders
+                </NavLink>
+              </>
             )}
             {isAdmin && (
               <NavLink to={ROUTES.ADMIN} className={navLinkClass} onClick={() => setMenuOpen(false)}>

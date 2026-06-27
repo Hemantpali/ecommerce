@@ -6,6 +6,7 @@ import AdminRoute from './AdminRoute';
 
 import HomePage from '../pages/products/HomePage';
 import ProductDetailPage from '../pages/products/ProductDetailPage';
+import WishlistPage from '../pages/products/WishlistPage';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import CartPage from '../pages/cart/CartPage';
@@ -25,6 +26,14 @@ const AppRouter = () => (
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="cart" element={<CartPage />} />
+        <Route
+          path="wishlist"
+          element={
+            <ProtectedRoute>
+              <WishlistPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="checkout"
