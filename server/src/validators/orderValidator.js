@@ -24,6 +24,7 @@ const createOrderRules = [
   body('taxPrice').optional().isFloat({ min: 0 }),
   body('shippingPrice').optional().isFloat({ min: 0 }),
   body('totalPrice').optional().isFloat({ min: 0 }),
+  body('couponCode').optional().trim().notEmpty(),
 ];
 
 const orderIdRules = [param('id').isMongoId().withMessage('Invalid order ID')];
@@ -59,6 +60,7 @@ const createOrderFromCartRules = [
   body('paymentMethod').trim().notEmpty().withMessage('Payment method is required'),
   body('taxPrice').optional().isFloat({ min: 0 }),
   body('shippingPrice').optional().isFloat({ min: 0 }),
+  body('couponCode').optional().trim().notEmpty(),
 ];
 
 module.exports = {

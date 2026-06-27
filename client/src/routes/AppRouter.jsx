@@ -16,6 +16,7 @@ import OrderDetailPage from '../pages/orders/OrderDetailPage';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminProducts from '../pages/admin/AdminProducts';
 import AdminOrders from '../pages/admin/AdminOrders';
+import AdminCoupons from '../pages/admin/AdminCoupons';
 
 const AppRouter = () => (
   <BrowserRouter>
@@ -71,6 +72,7 @@ const AppRouter = () => (
           <Route index element={<AdminDashboard />} />
           <Route path="products" element={<AdminProducts />} />
           <Route path="orders" element={<AdminOrders />} />
+          <Route path="coupons" element={<AdminCoupons />} />
         </Route>
       </Route>
     </Routes>
