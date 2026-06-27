@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { productApi } from '../../api/productApi';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 import { useAuth } from '../../context/AuthContext';
 import { formatPrice } from '../../utils/formatPrice';
 import Loader from '../../components/common/Loader';
@@ -13,11 +14,13 @@ const ProductDetailPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
   const { addToCart, updating } = useCart();
+  const { isWishlisted, toggleWishlist, updatingId } = useWishlist();
   const [product, setProduct] = useState(null);
   const [qty, setQty] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [cartError, setCartError] = useState('');
+  const [wishlistError, setWishlistError] = useState('');
   const [added, setAdded] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
@@ -62,6 +65,25 @@ const ProductDetailPage = () => {
     }
   };
 
+  const handleWishlistToggle = async () => {
+    setWishlistError('');
+
+    if (!isAuthenticated) {
+      navigate(ROUTES.LOGIN, { state: { from: { pathname: `/products/${id}` } } });
+      return;
+    }
+
+    try {
+      await toggleWishlist(product._id);
+    } catch (err) {
+      if (err.message === 'LOGIN_REQUIRED') {
+        navigate(ROUTES.LOGIN, { state: { from: { pathname: `/products/${id}` } } });
+      } else {
+        setWishlistError(err.response?.data?.message || 'Failed to update wishlist');
+      }
+    }
+  };
+
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     setReviewError('');
@@ -101,6 +123,11 @@ const ProductDetailPage = () => {
           <Alert message={cartError} />
         </div>
       )}
+      {wishlistError && (
+        <div className="mb-4">
+          <Alert message={wishlistError} />
+        </div>
+      )}
 
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="card overflow-hidden">
@@ -115,8 +142,24 @@ const ProductDetailPage = () => {
         </div>
 
         <div>
-          <p className="text-sm font-medium uppercase tracking-wide text-brand-600">{product.category}</p>
-          <h1 className="mt-2 text-3xl font-bold text-slate-900">{product.name}</h1>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium uppercase tracking-wide text-brand-600">{product.category}</p>
+              <h1 className="mt-2 text-3xl font-bold text-slate-900">{product.name}</h1>
+            </div>
+            <button
+              type="button"
+              onClick={handleWishlistToggle}
+              disabled={updatingId === product._id}
+              className={`rounded-full border px-4 py-2 text-sm font-medium transition disabled:opacity-60 ${
+                isWishlisted(product._id)
+                  ? 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100'
+                  : 'border-slate-200 text-slate-600 hover:border-red-200 hover:text-red-500'
+              }`}
+            >
+              {isWishlisted(product._id) ? '♥ Favourited' : '♡ Add to Favourites'}
+            </button>
+          </div>
           {product.brand && <p className="mt-1 text-slate-500">Brand: {product.brand}</p>}
 
           <div className="mt-4 flex items-center gap-4">
