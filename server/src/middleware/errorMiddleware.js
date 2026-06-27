@@ -20,6 +20,11 @@ const errorHandler = (err, _req, res, _next) => {
     message = `${field.charAt(0).toUpperCase()}${field.slice(1)} already exists`;
   }
 
+  if (err.name === 'MulterError') {
+    statusCode = 400;
+    message = err.code === 'LIMIT_FILE_SIZE' ? 'Image file cannot exceed 5MB' : err.message;
+  }
+
   if (err.name === 'ValidationError') {
     statusCode = 400;
     message = Object.values(err.errors)

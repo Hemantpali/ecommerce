@@ -12,6 +12,7 @@ const AdminProducts = () => {
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -27,12 +28,14 @@ const AdminProducts = () => {
   const openCreate = () => {
     clearMessages();
     setForm(EMPTY_PRODUCT_FORM);
+    setImageFile(null);
     setEditingId(null);
     setShowForm(true);
   };
 
   const openEdit = (product) => {
     clearMessages();
+    setImageFile(null);
     setForm({
       name: product.name,
       description: product.description,
@@ -49,11 +52,16 @@ const AdminProducts = () => {
   const closeForm = () => {
     setShowForm(false);
     setEditingId(null);
+    setImageFile(null);
     setForm(EMPTY_PRODUCT_FORM);
   };
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleImageFileChange = (file) => {
+    setImageFile(file);
   };
 
   const handleSubmit = async (e) => {
@@ -72,6 +80,13 @@ const AdminProducts = () => {
     };
 
     try {
+      if (imageFile) {
+        const imagePayload = new FormData();
+        imagePayload.append('image', imageFile);
+        const { data } = await productApi.uploadProductImage(imagePayload);
+        payload.image = data.data.url;
+      }
+
       if (editingId) {
         await productApi.updateProduct(editingId, payload);
         setSuccess('Product updated successfully');
@@ -141,6 +156,7 @@ const AdminProducts = () => {
             saving={saving}
             editing={!!editingId}
             onChange={handleChange}
+            onImageFileChange={handleImageFileChange}
             onSubmit={handleSubmit}
             onCancel={closeForm}
           />

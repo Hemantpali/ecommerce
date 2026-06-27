@@ -8,7 +8,16 @@ export const EMPTY_PRODUCT_FORM = {
   countInStock: '',
 };
 
-const ProductForm = ({ form, categories, saving, editing, onChange, onSubmit, onCancel }) => (
+const ProductForm = ({
+  form,
+  categories,
+  saving,
+  editing,
+  onChange,
+  onImageFileChange,
+  onSubmit,
+  onCancel,
+}) => (
   <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
     <div>
       <label className="mb-1 block text-sm font-medium text-slate-700">Name *</label>
@@ -87,6 +96,14 @@ const ProductForm = ({ form, categories, saving, editing, onChange, onSubmit, on
         className="input-field"
         placeholder="https://..."
       />
+      <label className="mt-3 block text-sm font-medium text-slate-700">Or upload image</label>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => onImageFileChange(e.target.files?.[0] || null)}
+        className="mt-1 block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
+      />
+      <p className="mt-1 text-xs text-slate-500">Uploads are stored in Cloudinary and use the returned secure URL.</p>
     </div>
 
     <div className="sm:col-span-2">
