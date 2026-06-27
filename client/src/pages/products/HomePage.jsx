@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useProducts, useCategories } from '../../hooks/useProducts';
+import PromoBanner from '../../components/common/PromoBanner';
+import ProductCarousel from '../../components/products/ProductCarousel';
 import ProductFilters from '../../components/products/ProductFilters';
 import ProductList from '../../components/products/ProductList';
 import Alert from '../../components/common/Alert';
@@ -20,6 +22,11 @@ const HomePage = () => {
     page,
     limit: 12,
   });
+  const {
+    products: featuredProducts,
+    loading: featuredLoading,
+    error: featuredError,
+  } = useProducts({ sort: 'rating', limit: 8 });
 
   const handleKeywordChange = (value) => {
     setKeyword(value);
@@ -44,12 +51,13 @@ const HomePage = () => {
 
   return (
     <div className="page-container">
-      <section className="mb-10 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-700 px-6 py-12 text-white sm:px-10">
-        <h1 className="text-3xl font-bold sm:text-4xl">Discover Quality Products</h1>
-        <p className="mt-3 max-w-xl text-brand-100">
-          Shop the latest collection with fast delivery and secure checkout.
-        </p>
-      </section>
+      <PromoBanner />
+
+      <ProductCarousel
+        products={featuredProducts}
+        loading={featuredLoading}
+        error={featuredError}
+      />
 
       <ProductFilters
         keyword={keyword}
