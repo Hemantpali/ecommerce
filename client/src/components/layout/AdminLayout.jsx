@@ -28,6 +28,9 @@ const AdminLayout = () => {
             <NavLink to={`${ROUTES.ADMIN}/orders`} className={linkClass}>
               Orders
             </NavLink>
+            <NavLink to={`${ROUTES.ADMIN}/coupons`} className={linkClass}>
+              Coupons
+            </NavLink>
           </nav>
         </aside>
         <div>

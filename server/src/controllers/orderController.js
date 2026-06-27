@@ -1,5 +1,6 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const Coupon = require('../models/Coupon');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const { sendSuccess, sendCreated } = require('../utils/apiResponse');
@@ -36,11 +37,43 @@ const buildOrderItems = async (orderItemsInput) => {
   return orderItems;
 };
 
-const calculatePrices = (orderItems, taxPrice = 0, shippingPrice = 0) => {
+const calculatePrices = (orderItems, taxPrice = 0, shippingPrice = 0, discountAmount = 0) => {
   const itemsPrice = orderItems.reduce((acc, item) => acc + item.price * item.qty, 0);
-  const totalPrice = itemsPrice + Number(taxPrice) + Number(shippingPrice);
+  const totalPrice = Math.max(0, itemsPrice + Number(taxPrice) + Number(shippingPrice) - Number(discountAmount));
 
   return { itemsPrice, totalPrice };
+};
+
+const validateAndApplyCoupon = async (couponCode, itemsPrice) => {
+  if (!couponCode) return { discountAmount: 0, couponCode: undefined };
+
+  const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
+
+  if (!coupon) throw new AppError('Invalid coupon code', 400);
+  if (!coupon.isActive) throw new AppError('This coupon is no longer active', 400);
+  if (coupon.expiresAt && new Date() > coupon.expiresAt) throw new AppError('This coupon has expired', 400);
+  if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) throw new AppError('This coupon has reached its usage limit', 400);
+  if (itemsPrice < coupon.minOrderAmount) throw new AppError(`Minimum order amount of ₹${coupon.minOrderAmount.toLocaleString('en-IN')} required for this coupon`, 400);
+
+  let discountAmount = 0;
+
+  if (coupon.type === 'fixed') {
+    discountAmount = coupon.value;
+  } else {
+    discountAmount = (itemsPrice * coupon.value) / 100;
+    if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
+      discountAmount = coupon.maxDiscount;
+    }
+  }
+
+  if (discountAmount > itemsPrice) {
+    discountAmount = itemsPrice;
+  }
+
+  coupon.usedCount += 1;
+  await coupon.save();
+
+  return { discountAmount, couponCode: coupon.code };
 };
 
 const restoreOrderStock = async (orderItems) => {
@@ -61,10 +94,18 @@ const deductOrderStock = async (orderItems) => {
 
 const placeOrder = async (userId, body) => {
   const orderItems = await buildOrderItems(body.orderItems);
-  const { itemsPrice, totalPrice } = calculatePrices(
+  const itemsPrice = orderItems.reduce((acc, item) => acc + item.price * item.qty, 0);
+
+  const { discountAmount, couponCode } = await validateAndApplyCoupon(
+    body.couponCode,
+    itemsPrice
+  );
+
+  const { totalPrice } = calculatePrices(
     orderItems,
     body.taxPrice,
-    body.shippingPrice
+    body.shippingPrice,
+    discountAmount
   );
 
   const order = await Order.create({
@@ -75,6 +116,8 @@ const placeOrder = async (userId, body) => {
     itemsPrice,
     taxPrice: body.taxPrice || 0,
     shippingPrice: body.shippingPrice || 0,
+    discountAmount,
+    couponCode,
     totalPrice,
   });
 

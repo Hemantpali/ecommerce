@@ -14,6 +14,19 @@ const OrderSummary = ({ order }) => (
       <span className="text-slate-500">Tax</span>
       <span>{formatPrice(order.taxPrice)}</span>
     </div>
+    {order.discountAmount > 0 && (
+      <div className="flex justify-between text-green-600">
+        <span>
+          Discount
+          {order.couponCode && (
+            <span className="ml-1 rounded bg-green-100 px-1.5 py-0.5 text-xs">
+              {order.couponCode}
+            </span>
+          )}
+        </span>
+        <span>-{formatPrice(order.discountAmount)}</span>
+      </div>
+    )}
     <div className="flex justify-between border-t border-slate-200 pt-2 font-bold text-base">
       <span>Total</span>
       <span>{formatPrice(order.totalPrice)}</span>
