@@ -1,5 +1,4 @@
-import { Search, X } from 'lucide-react';
-import { Input } from '../ui/input';
+import { X } from 'lucide-react';
 import { Select } from '../ui/select';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
@@ -18,19 +17,7 @@ const ProductFilters = ({
 
   return (
     <div id="products-section" className="mb-8 space-y-4 pt-4">
-      <div className="flex flex-col gap-3 sm:flex-row">
-        {/* Search Input */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-          <Input
-            type="search"
-            placeholder="Search products, brands, and categories..."
-            value={keyword}
-            onChange={(e) => onKeywordChange(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         {/* Category Select */}
         <Select
           value={category}

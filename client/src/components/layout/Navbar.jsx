@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
@@ -6,6 +6,7 @@ import { useWishlist } from '../../context/WishlistContext';
 import { useTheme } from '../../context/ThemeContext';
 import { ROUTES } from '../../constants/routes';
 import { Button } from '../ui/button';
+import { Input } from '../ui/input';
 import {
   Sun,
   Moon,
@@ -17,7 +18,8 @@ import {
   X,
   Package,
   Shield,
-  ShoppingBag
+  ShoppingBag,
+  Search
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -26,8 +28,33 @@ const Navbar = () => {
   const { wishlistCount } = useWishlist();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchVal, setSearchVal] = useState(searchParams.get('search') || '');
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchVal.trim()) {
+      navigate(`/?search=${encodeURIComponent(searchVal.trim())}`);
+    } else {
+      navigate('/');
+    }
+    setSearchOpen(false);
+    setMenuOpen(false);
+  };
+
+  const handleSearchChange = (val) => {
+    setSearchVal(val);
+    if (window.location.pathname === '/') {
+      if (val.trim()) {
+        navigate(`/?search=${encodeURIComponent(val)}`, { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -51,6 +78,18 @@ const Navbar = () => {
           </div>
           <span>KOL <span className="text-primary">Store</span></span>
         </Link>
+
+        {/* Search Bar (Desktop) */}
+        <form onSubmit={handleSearchSubmit} className="hidden md:flex relative flex-1 max-w-xs lg:max-w-md mx-4">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <Input
+            type="search"
+            placeholder="Search products, brands..."
+            value={searchVal}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="pl-9 h-9 w-full bg-secondary/50 border-border/60 focus:bg-background focus:ring-1 focus:ring-primary/20 duration-150"
+          />
+        </form>
 
         {/* Desktop Nav */}
         <nav className="hidden items-center gap-6 md:flex">
@@ -188,6 +227,17 @@ const Navbar = () => {
 
         {/* Mobile menu button */}
         <div className="flex items-center gap-2 md:hidden">
+          {/* Mobile Search Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => { setSearchOpen(!searchOpen); setMenuOpen(false); }}
+            aria-label="Toggle search"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Search className="h-5 w-5" />
+          </Button>
+
           {/* Mobile Theme Toggle */}
           <Button
             variant="ghost"
@@ -210,6 +260,23 @@ const Navbar = () => {
           </Button>
         </div>
       </div>
+
+      {/* Mobile Search Bar */}
+      {searchOpen && (
+        <div className="border-t border-border bg-background px-4 py-3 md:hidden animate-in slide-in-from-top-5 duration-200">
+          <form onSubmit={handleSearchSubmit} className="relative flex w-full">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Input
+              type="search"
+              placeholder="Search products, brands..."
+              value={searchVal}
+              onChange={(e) => setSearchVal(e.target.value)}
+              className="pl-9 h-9 w-full bg-secondary/50 border-border/60 focus:bg-background"
+              autoFocus
+            />
+          </form>
+        </div>
+      )}
 
       {/* Mobile Menu */}
       {menuOpen && (
