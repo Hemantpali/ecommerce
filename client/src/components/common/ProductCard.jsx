@@ -44,14 +44,14 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <Card className="group relative flex flex-col h-full bg-card hover:shadow-lg transition-all duration-300">
+    <Card className="group relative flex flex-col h-full bg-card border-none shadow-none hover:shadow-lg transition-all duration-300">
       <Link to={`/products/${product._id}`} className="block flex-1">
         {/* Product Image */}
-        <div className="aspect-square w-full overflow-hidden bg-secondary relative">
+        <div className="aspect-square w-full overflow-hidden bg-transparent relative flex items-center justify-center p-4">
           <img
             src={product.image}
             alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
             onError={(e) => {
               e.target.src = 'https://placehold.co/400x400/e2e8f0/64748b?text=Product';
             }}

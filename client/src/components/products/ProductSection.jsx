@@ -30,7 +30,7 @@ const ProductSection = ({ title, tagline, Icon, products, loading, error, onView
       {loading ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, idx) => (
-            <Card key={idx} className="flex flex-col h-full border border-border bg-card animate-pulse">
+            <Card key={idx} className="flex flex-col h-full border-none bg-card animate-pulse">
               <div className="aspect-square w-full bg-muted" />
               <div className="p-4 flex-1 space-y-3">
                 <div className="h-3 w-1/4 rounded bg-muted" />

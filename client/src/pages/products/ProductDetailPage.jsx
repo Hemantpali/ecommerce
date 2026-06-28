@@ -196,17 +196,17 @@ const ProductDetailPage = () => {
 
       {/* Main product card layout */}
       <div className="grid gap-8 lg:grid-cols-2 mb-10">
-        <Card className="overflow-hidden border border-border bg-card shadow-sm">
-          <CardContent className="p-0">
+        <Card className="overflow-hidden border-none bg-card shadow-none flex items-center justify-center p-6 aspect-square">
+          <div className="flex items-center justify-center w-full h-full">
             <img
               src={product.image}
               alt={product.name}
-              className="aspect-square w-full object-cover transition-transform duration-500 hover:scale-102"
+              className="max-h-full max-w-full object-contain transition-transform duration-500 hover:scale-102"
               onError={(e) => {
                 e.target.src = 'https://placehold.co/600x600/e2e8f0/64748b?text=Product';
               }}
             />
-          </CardContent>
+          </div>
         </Card>
 
         <div className="flex flex-col justify-between py-2">

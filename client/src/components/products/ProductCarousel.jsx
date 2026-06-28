@@ -123,12 +123,12 @@ const ProductCarousel = ({ products = [], loading = false, error = '' }) => {
           const rating = Number(product.rating || 0);
 
           return (
-            <Card key={`${product._id}-${index}`} className="group flex flex-col h-full bg-card hover:shadow-lg transition-all duration-300">
-              <Link to={`/products/${product._id}`} className="block relative aspect-[4/3] overflow-hidden bg-secondary">
+            <Card key={`${product._id}-${index}`} className="group flex flex-col h-full bg-card border-none shadow-none hover:shadow-lg transition-all duration-300">
+              <Link to={`/products/${product._id}`} className="block relative aspect-[4/3] overflow-hidden bg-transparent flex items-center justify-center p-4">
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
                   onError={(e) => {
                     e.target.src = 'https://placehold.co/400x300/e2e8f0/64748b?text=Product';
                   }}
