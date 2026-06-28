@@ -1,0 +1,274 @@
+{
+  "products": [
+    {
+      "name": "iPhone 16 Pro Max",
+      "description": "Apple's flagship smartphone featuring the A18 Pro chip, 6.9-inch Super Retina XDR OLED display, 48MP Fusion camera system with 5x optical zoom, titanium design, and all-day battery life. Supports Apple Intelligence and USB-C.",
+      "price": 159900,
+      "category": "Electronics",
+      "brand": "Apple",
+      "countInStock": 20,
+      "image": "https://placehold.co/600x600/1a1a2e/e2e8f0?text=iPhone+16+Pro+Max"
+    },
+    {
+      "name": "Samsung Galaxy S25 Ultra",
+      "description": "Samsung's premium Android flagship with a 6.9-inch Dynamic AMOLED 2X display, Snapdragon 8 Elite processor, 200MP main camera with AI enhancements, built-in S Pen, and Galaxy AI features. Titanium frame with Gorilla Glass Armor.",
+      "price": 134999,
+      "category": "Electronics",
+      "brand": "Samsung",
+      "countInStock": 25,
+      "image": "https://placehold.co/600x600/14213d/e2e8f0?text=Galaxy+S25+Ultra"
+    },
+    {
+      "name": "Google Pixel 9 Pro",
+      "description": "Google's AI-first smartphone featuring the Tensor G4 chip, 6.7-inch LTPO OLED display, 50MP main camera with best-in-class computational photography, 7 years of OS updates, and exclusive Google AI features like Magic Editor and Gemini assistant.",
+      "price": 99999,
+      "category": "Electronics",
+      "brand": "Google",
+      "countInStock": 15,
+      "image": "https://placehold.co/600x600/2d3436/e2e8f0?text=Pixel+9+Pro"
+    },
+    {
+      "name": "OnePlus 13",
+      "description": "The OnePlus 13 features a Snapdragon 8 Elite processor, 6.82-inch LTPO AMOLED display with 120Hz refresh rate, 50MP triple camera system co-developed with Hasselblad, 6000mAh battery with 100W SUPERVOOC charging, and OxygenOS 15.",
+      "price": 69999,
+      "category": "Electronics",
+      "brand": "OnePlus",
+      "countInStock": 30,
+      "image": "https://placehold.co/600x600/2c3e50/e2e8f0?text=OnePlus+13"
+    },
+    {
+      "name": "Nothing Phone 3",
+      "description": "Nothing's latest transparent-design smartphone featuring the Snapdragon 8s Gen 3 chip, 6.7-inch OLED display, 50MP dual rear camera, iconic Glyph Interface with customizable LED patterns, and Nothing OS 3.0 with deep AI integration.",
+      "price": 44999,
+      "category": "Electronics",
+      "brand": "Nothing",
+      "countInStock": 20,
+      "image": "https://placehold.co/600x600/1a1a1a/e2e8f0?text=Nothing+Phone+3"
+    },
+    {
+      "name": "MacBook Air M4",
+      "description": "Apple's thinnest and lightest laptop powered by the M4 chip with 10-core CPU and 10-core GPU. Features a 15.3-inch Liquid Retina display, 18GB unified memory, MagSafe charging, 1080p FaceTime HD camera, and up to 18 hours of battery life in a fanless design.",
+      "price": 114900,
+      "category": "Electronics",
+      "brand": "Apple",
+      "countInStock": 15,
+      "image": "https://placehold.co/600x600/c5c5c5/1a1a2e?text=MacBook+Air+M4"
+    },
+    {
+      "name": "Dell XPS 16",
+      "description": "Dell's premium ultrabook featuring a 16.3-inch 4K OLED InfinityEdge display, Intel Core Ultra 9 processor, NVIDIA GeForce RTX 4070 graphics, 32GB DDR5 RAM, aluminum chassis with CNC machined edges, and a stunning zero-lattice keyboard.",
+      "price": 189990,
+      "category": "Electronics",
+      "brand": "Dell",
+      "countInStock": 10,
+      "image": "https://placehold.co/600x600/34495e/e2e8f0?text=Dell+XPS+16"
+    },
+    {
+      "name": "Lenovo ThinkPad X1 Carbon Gen 13",
+      "description": "Business-class ultrabook with a 14-inch 2.8K OLED display, Intel Core Ultra 7 processor, 32GB LPDDR5x RAM, 1TB PCIe Gen 4 SSD, MIL-STD-810H durability, full magnesium chassis weighing just 980g, and legendary ThinkPad keyboard with TrackPoint.",
+      "price": 169990,
+      "category": "Electronics",
+      "brand": "Lenovo",
+      "countInStock": 12,
+      "image": "https://placehold.co/600x600/2c3e50/e2e8f0?text=ThinkPad+X1+Carbon"
+    },
+    {
+      "name": "ASUS ROG Zephyrus G16",
+      "description": "Gaming powerhouse with a 16-inch QHD+ 240Hz OLED display, AMD Ryzen 9 AI processor, NVIDIA GeForce RTX 5080 graphics, 32GB DDR5 RAM, liquid metal thermal compound, RGB per-key keyboard, and a sleek CNC aluminum chassis under 2cm thin.",
+      "price": 219990,
+      "category": "Electronics",
+      "brand": "ASUS",
+      "countInStock": 8,
+      "image": "https://placehold.co/600x600/1a1a2e/e2e8f0?text=ROG+Zephyrus+G16"
+    },
+    {
+      "name": "HP Spectre x360 16",
+      "description": "Convertible 2-in-1 laptop with a 16-inch 3K+ OLED touch display, Intel Core Ultra 7 processor, 16GB RAM, 1TB SSD, quad speakers tuned by Bang & Olufsen, gem-cut design with dual chamfer edges, 360-degree hinge, and Windows Hello IR camera.",
+      "price": 149990,
+      "category": "Electronics",
+      "brand": "HP",
+      "countInStock": 10,
+      "image": "https://placehold.co/600x600/4a4a4a/e2e8f0?text=Spectre+x360"
+    },
+    {
+      "name": "Steam Deck OLED 512GB",
+      "description": "Valve's handheld gaming PC with a 7.4-inch HDR OLED display, custom AMD APU, 512GB NVMe SSD, 90Hz refresh rate, 50Whr battery delivering 3-12 hours of gameplay, SteamOS with Proton compatibility for thousands of Windows games, and haptic trackpads.",
+      "price": 49990,
+      "category": "Electronics",
+      "brand": "Valve",
+      "countInStock": 10,
+      "image": "https://placehold.co/600x600/1a1a1a/e2e8f0?text=Steam+Deck+OLED"
+    },
+    {
+      "name": "Steam Deck OLED 1TB",
+      "description": "Top-tier Valve handheld gaming PC with a 7.4-inch 90Hz HDR OLED display, custom AMD APU, 1TB NVMe SSD, anti-glare etched glass screen, 50Whr battery, SteamOS, and the carrying case included. Play your entire Steam library anywhere.",
+      "price": 62990,
+      "category": "Electronics",
+      "brand": "Valve",
+      "countInStock": 8,
+      "image": "https://placehold.co/600x600/1a1a1a/e2e8f0?text=Steam+Deck+1TB"
+    },
+    {
+      "name": "Sony PlayStation 5 Slim",
+      "description": "The slimmer redesigned PlayStation 5 with a 825GB custom SSD, AMD Ryzen Zen 2 CPU, RDNA 2 GPU supporting ray tracing, DualSense wireless controller with haptic feedback and adaptive triggers, 4K Blu-ray disc drive, and support for thousands of PS5 and PS4 titles.",
+      "price": 54990,
+      "category": "Electronics",
+      "brand": "Sony",
+      "countInStock": 15,
+      "image": "https://placehold.co/600x600/2c3e50/e2e8f0?text=PS5+Slim"
+    },
+    {
+      "name": "Xbox Series X",
+      "description": "Microsoft's most powerful console ever with a custom 12 TFLOPS RDNA 2 GPU, AMD Zen 2 processor, 1TB custom NVMe SSD, 16GB GDDR6 RAM, 4K gaming at up to 120fps, Dolby Vision and Dolby Atmos, Quick Resume, and backward compatibility across four generations.",
+      "price": 59990,
+      "category": "Electronics",
+      "brand": "Microsoft",
+      "countInStock": 12,
+      "image": "https://placehold.co/600x600/1a1a1a/e2e8f0?text=Xbox+Series+X"
+    },
+    {
+      "name": "Ray-Ban Meta Smart Glasses",
+      "description": "Meta's second-gen smart glasses co-designed with Ray-Ban featuring a 12MP ultra-wide camera, open-ear speakers, directional audio, built-in mic array for calls and AI assistant, touchpad controls, live streaming to Facebook/Instagram, and fashionable Wayfarer design.",
+      "price": 34990,
+      "category": "Electronics",
+      "brand": "Meta",
+      "countInStock": 8,
+      "image": "https://placehold.co/600x600/2c3e50/e2e8f0?text=Ray-Ban+Meta"
+    },
+    {
+      "name": "Logitech MX Master 3S Wireless Mouse",
+      "description": "Premium wireless mouse with 8000 DPI optical sensor, MagSpeed electromagnetic scroll wheel, quiet click buttons, ergonomic design with thumb rest, USB-C charging with 70-day battery, Flow cross-device control, and support for up to 3 devices via Bluetooth or Logi Bolt.",
+      "price": 7495,
+      "category": "Accessories",
+      "brand": "Logitech",
+      "countInStock": 35,
+      "image": "https://placehold.co/600x600/2d3436/e2e8f0?text=MX+Master+3S"
+    },
+    {
+      "name": "Razer DeathAdder V3 Pro Wireless Mouse",
+      "description": "Ultra-lightweight esports mouse weighing just 63g with Razer Focus Pro 30K optical sensor, HyperSpeed Wireless technology, 90-hour battery life, 8 programmable buttons, ergonomic right-handed design, 100% PTFE mouse feet, and optical mouse switches rated for 90 million clicks.",
+      "price": 11999,
+      "category": "Accessories",
+      "brand": "Razer",
+      "countInStock": 25,
+      "image": "https://placehold.co/600x600/1a1a1a/e2e8f0?text=DeathAdder+V3+Pro"
+    },
+    {
+      "name": "Keychron Q1 Pro Mechanical Keyboard",
+      "description": "Premium 75% wireless mechanical keyboard with full aluminum CNC machined body, QMK/VIA programmable, hot-swappable Gateron Jupiter switches, PBT double-shot keycaps, south-facing RGB backlight, 4000mAh battery, and Bluetooth 5.1 supporting up to 3 devices.",
+      "price": 17999,
+      "category": "Accessories",
+      "brand": "Keychron",
+      "countInStock": 20,
+      "image": "https://placehold.co/600x600/34495e/e2e8f0?text=Keychron+Q1+Pro"
+    },
+    {
+      "name": "Logitech MX Mechanical Wireless Keyboard",
+      "description": "Full-size wireless mechanical keyboard with Logitech's Tactile Silent switches, Smart Backlighting, USB-C charging with 15-day battery life, multi-device pairing for up to 3 devices via Bluetooth or Logi Bolt, and a premium aluminum top case in graphite finish.",
+      "price": 14999,
+      "category": "Accessories",
+      "brand": "Logitech",
+      "countInStock": 25,
+      "image": "https://placehold.co/600x600/2d3436/e2e8f0?text=MX+Mechanical"
+    },
+    {
+      "name": "Razer Huntsman V3 Pro TKL Keyboard",
+      "description": "Esports-grade tenkeyless keyboard with Razer's Analog Optical Switches featuring adjustable actuation from 0.1mm to 4.0mm, Rapid Trigger mode for instant re-engagement, doubleshot PBT keycaps, aluminum top plate, and Chroma RGB lighting with side underglow.",
+      "price": 21999,
+      "category": "Accessories",
+      "brand": "Razer",
+      "countInStock": 18,
+      "image": "https://placehold.co/600x600/1a1a1a/e2e8f0?text=Huntsman+V3+Pro"
+    },
+    {
+      "name": "iPhone 16 Pro Max Silicone Case",
+      "description": "Official Apple silicone case for iPhone 16 Pro Max in Clay color. Made from 55% recycled silicone material, soft-touch exterior with microfibre lining, precise cutouts for camera and buttons, and compatibility with MagSafe accessories and wireless charging.",
+      "price": 3900,
+      "category": "Accessories",
+      "brand": "Apple",
+      "countInStock": 50,
+      "image": "https://placehold.co/600x600/d4a574/e2e8f0?text=iPhone+16+Case"
+    },
+    {
+      "name": "Samsung Galaxy S25 Ultra Spigen Rugged Armor Case",
+      "description": "Military-grade drop protection case for Samsung Galaxy S25 Ultra by Spigen. Features Air Cushion Technology in all corners, raised bezels for screen and camera protection, slim profile with carbon fiber texture design, and precise cutouts for S Pen and charging port.",
+      "price": 2499,
+      "category": "Accessories",
+      "brand": "Spigen",
+      "countInStock": 45,
+      "image": "https://placehold.co/600x600/2c3e50/e2e8f0?text=S25+Ultra+Case"
+    },
+    {
+      "name": "Google Pixel 9 Pro Official Case",
+      "description": "Google's official Pixel 9 Pro case made with recycled materials in Jade color. Features a soft-touch finish, raised edges for screen and camera protection, precise cutouts for the camera bar and buttons, and full compatibility with Pixel Stand wireless charging.",
+      "price": 3499,
+      "category": "Accessories",
+      "brand": "Google",
+      "countInStock": 30,
+      "image": "https://placehold.co/600x600/4a7c59/e2e8f0?text=Pixel+9+Pro+Case"
+    },
+    {
+      "name": "OnePlus 13 Sandstone Bumper Case",
+      "description": "Official OnePlus Sandstone case for OnePlus 13 with the signature sandstone texture for a grippy, scratch-resistant finish. Precise cutouts, raised camera protection, slim profile, and OnePlus logo cutout. Made from eco-friendly materials.",
+      "price": 1999,
+      "category": "Accessories",
+      "brand": "OnePlus",
+      "countInStock": 40,
+      "image": "https://placehold.co/600x600/5d4e37/e2e8f0?text=OnePlus+13+Case"
+    },
+    {
+      "name": "Nothing Phone 3 Transparent Case",
+      "description": "Official Nothing transparent case for Phone 3 designed to showcase the Glyph Interface. Made from flexible TPU with scratch-resistant polycarbonate back, raised camera and screen protection, and precise cutouts that fully expose the LED glyph pattern.",
+      "price": 2499,
+      "category": "Accessories",
+      "brand": "Nothing",
+      "countInStock": 35,
+      "image": "https://placehold.co/600x600/dddddd/1a1a1a?text=Nothing+Phone+3+Case"
+    },
+    {
+      "name": "Grand Theft Auto VI",
+      "description": "The next entry in Rockstar Games' legendary open-world franchise set in the fictional state of Leonida, home to neon-lit Vice City and beyond. Features dual protagonists, a massive map with unprecedented detail, enhanced physics, and an immersive single-player story.",
+      "price": 4999,
+      "category": "Gaming",
+      "brand": "Rockstar Games",
+      "countInStock": 50,
+      "image": "https://placehold.co/600x600/ff6b6b/e2e8f0?text=GTA+VI"
+    },
+    {
+      "name": "Elden Ring",
+      "description": "FromSoftware's award-winning action RPG developed with George R.R. Martin. Explore the Lands Between, a vast world filled with epic boss battles, deep lore, and freedom to approach challenges in any order. Includes the Shadow of the Erdtree DLC on disc.",
+      "price": 3999,
+      "category": "Gaming",
+      "brand": "Bandai Namco",
+      "countInStock": 40,
+      "image": "https://placehold.co/600x600/d4a017/e2e8f0?text=Elden+Ring"
+    },
+    {
+      "name": "Marvel's Spider-Man 2",
+      "description": "Insomniac Games' acclaimed superhero sequel featuring both Peter Parker and Miles Morales. Swing through an expanded Marvel's New York, fight iconic villains like Venom and Kraven, swap between two Spider-Men, and experience a deeply emotional story.",
+      "price": 3999,
+      "category": "Gaming",
+      "brand": "Sony Interactive Entertainment",
+      "countInStock": 35,
+      "image": "https://placehold.co/600x600/c0392b/e2e8f0?text=Spider-Man+2"
+    },
+    {
+      "name": "Forza Motorsport",
+      "description": "Turn 10 Studios' racing simulator featuring over 500 real-world cars, 20 meticulously detailed tracks with dynamic time of day and weather, ray-traced visuals at 60fps, realistic tire and fuel strategy, and a deep career mode with the new Builder's Cup.",
+      "price": 3499,
+      "category": "Gaming",
+      "brand": "Xbox Game Studios",
+      "countInStock": 30,
+      "image": "https://placehold.co/600x600/2980b9/e2e8f0?text=Forza+Motorsport"
+    },
+    {
+      "name": "Call of Duty: Black Ops 6",
+      "description": "Treyarch's flagship first-person shooter featuring a cinematic single-player campaign set in the early 1990s, the return of round-based Zombies with two new maps at launch, and a revolutionary Omnimovement system that transforms multiplayer gameplay.",
+      "price": 4499,
+      "category": "Gaming",
+      "brand": "Activision",
+      "countInStock": 45,
+      "image": "https://placehold.co/600x600/e74c3c/e2e8f0?text=BO6"
+    }
+  ]
+}
