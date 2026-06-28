@@ -3,31 +3,56 @@ import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
+import { useTheme } from '../../context/ThemeContext';
 import { ROUTES } from '../../constants/routes';
+import { Button } from '../ui/button';
+import {
+  Sun,
+  Moon,
+  ShoppingCart,
+  Heart,
+  User,
+  LogOut,
+  Menu,
+  X,
+  Package,
+  Shield,
+  ShoppingBag
+} from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout, isAdmin } = useAuth();
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate(ROUTES.HOME);
     setMenuOpen(false);
+    setProfileDropdownOpen(false);
   };
 
   const navLinkClass = ({ isActive }) =>
-    `text-sm font-medium transition ${isActive ? 'text-brand-600' : 'text-slate-600 hover:text-brand-600'}`;
+    `text-sm font-medium transition-colors hover:text-primary ${
+      isActive ? 'text-primary' : 'text-muted-foreground'
+    }`;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md transition-all duration-300">
       <div className="page-container flex h-16 items-center justify-between">
-        <Link to={ROUTES.HOME} className="text-xl font-bold text-brand-600">
-          KOL Store
+        {/* Logo */}
+        <Link to={ROUTES.HOME} className="flex items-center gap-2 text-xl font-bold tracking-tight text-foreground">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md shadow-primary/20">
+            <ShoppingBag className="h-5 w-5" />
+          </div>
+          <span>KOL <span className="text-primary">Store</span></span>
         </Link>
 
+        {/* Desktop Nav */}
         <nav className="hidden items-center gap-6 md:flex">
           <NavLink to={ROUTES.HOME} className={navLinkClass} end>
             Shop
@@ -44,82 +69,151 @@ const Navbar = () => {
           )}
           {isAdmin && (
             <NavLink to={ROUTES.ADMIN} className={navLinkClass}>
-              Admin
+              Admin Panel
             </NavLink>
           )}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        {/* Right actions */}
+        <div className="hidden items-center gap-2 md:flex">
+          {/* Theme Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            {theme === 'dark' ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
+          </Button>
+
+          {/* Wishlist */}
           {user && (
-            <Link
-              to={ROUTES.WISHLIST}
-              className="relative rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 hover:text-red-500"
-              aria-label="Wishlist"
-            >
-              <span className="text-2xl leading-none">♡</span>
-              {wishlistCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                  {wishlistCount}
-                </span>
-              )}
+            <Link to={ROUTES.WISHLIST}>
+              <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-red-500">
+                <Heart className="h-5 w-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Button>
             </Link>
           )}
 
-          <Link
-            to={ROUTES.CART}
-            className="relative rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 hover:text-brand-600"
-          >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-              />
-            </svg>
-            {cartCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">
-                {cartCount}
-              </span>
-            )}
+          {/* Cart */}
+          <Link to={ROUTES.CART}>
+            <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-primary">
+              <ShoppingCart className="h-5 w-5" />
+              {cartCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shadow-sm">
+                  {cartCount}
+                </span>
+              )}
+            </Button>
           </Link>
 
+          {/* User Profile / Auth */}
           {user ? (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-slate-600">Hi, {(user.name || 'User').split(' ')[0]}</span>
-              <button onClick={handleLogout} className="btn-secondary text-sm">
-                Logout
-              </button>
+            <div className="relative">
+              <Button
+                variant="ghost"
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                className="flex items-center gap-2 pl-2 pr-3 py-1.5 h-auto hover:bg-secondary rounded-lg"
+              >
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <User className="h-4 w-4" />
+                </div>
+                <span className="text-xs font-medium text-foreground">
+                  {(user.name || 'User').split(' ')[0]}
+                </span>
+              </Button>
+
+              {/* Profile Dropdown */}
+              {profileDropdownOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-30"
+                    onClick={() => setProfileDropdownOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-48 origin-top-right rounded-lg border border-border bg-card p-1 text-card-foreground shadow-lg ring-1 ring-black/5 focus:outline-none z-40 animate-in fade-in-50 slide-in-from-top-1">
+                    <div className="px-3 py-2 border-b border-border/50">
+                      <p className="text-xs font-medium truncate">{user.name}</p>
+                      <p className="text-[10px] text-muted-foreground truncate mt-0.5">{user.email}</p>
+                    </div>
+                    <Link
+                      to={ROUTES.ORDERS}
+                      onClick={() => setProfileDropdownOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-xs rounded-md hover:bg-secondary text-foreground hover:text-primary transition"
+                    >
+                      <Package className="h-3.5 w-3.5" />
+                      <span>My Orders</span>
+                    </Link>
+                    {isAdmin && (
+                      <Link
+                        to={ROUTES.ADMIN}
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="flex items-center gap-2 px-3 py-2 text-xs rounded-md hover:bg-secondary text-foreground hover:text-primary transition"
+                      >
+                        <Shield className="h-3.5 w-3.5" />
+                        <span>Admin Panel</span>
+                      </Link>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-xs text-red-500 rounded-md hover:bg-red-500/10 transition text-left"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <Link to={ROUTES.LOGIN} className="btn-secondary text-sm">
-                Login
+            <div className="flex items-center gap-2 pl-2">
+              <Link to={ROUTES.LOGIN}>
+                <Button variant="ghost" size="sm">
+                  Login
+                </Button>
               </Link>
-              <Link to={ROUTES.REGISTER} className="btn-primary text-sm">
-                Register
+              <Link to={ROUTES.REGISTER}>
+                <Button variant="default" size="sm">
+                  Register
+                </Button>
               </Link>
             </div>
           )}
         </div>
 
-        <button
-          className="rounded-lg p-2 text-slate-600 md:hidden"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
-        >
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            {menuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
+        {/* Mobile menu button */}
+        <div className="flex items-center gap-2 md:hidden">
+          {/* Mobile Theme Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            {theme === 'dark' ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
 
+      {/* Mobile Menu */}
       {menuOpen && (
-        <div className="border-t border-slate-200 bg-white px-4 py-4 md:hidden">
+        <div className="border-t border-border bg-background px-4 py-4 md:hidden animate-in slide-in-from-top-5 duration-200">
           <nav className="flex flex-col gap-3">
             <NavLink to={ROUTES.HOME} className={navLinkClass} onClick={() => setMenuOpen(false)} end>
               Shop
@@ -139,22 +233,40 @@ const Navbar = () => {
             )}
             {isAdmin && (
               <NavLink to={ROUTES.ADMIN} className={navLinkClass} onClick={() => setMenuOpen(false)}>
-                Admin
+                Admin Panel
               </NavLink>
             )}
+            
+            <div className="h-px bg-border/50 my-2" />
+
             {user ? (
-              <button onClick={handleLogout} className="btn-secondary w-full">
-                Logout
-              </button>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 px-1">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <User className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold">{user.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{user.email}</p>
+                  </div>
+                </div>
+                <Button onClick={handleLogout} variant="destructive" className="w-full text-center mt-2">
+                  Logout
+                </Button>
+              </div>
             ) : (
-              <>
-                <Link to={ROUTES.LOGIN} className="btn-secondary w-full text-center" onClick={() => setMenuOpen(false)}>
-                  Login
+              <div className="flex flex-col gap-2 mt-2">
+                <Link to={ROUTES.LOGIN} className="w-full" onClick={() => setMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">
+                    Login
+                  </Button>
                 </Link>
-                <Link to={ROUTES.REGISTER} className="btn-primary w-full text-center" onClick={() => setMenuOpen(false)}>
-                  Register
+                <Link to={ROUTES.REGISTER} className="w-full" onClick={() => setMenuOpen(false)}>
+                  <Button variant="default" className="w-full">
+                    Register
+                  </Button>
                 </Link>
-              </>
+              </div>
             )}
           </nav>
         </div>

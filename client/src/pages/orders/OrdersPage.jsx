@@ -7,6 +7,9 @@ import EmptyState from '../../components/common/EmptyState';
 import OrderStatusBadge from '../../components/orders/OrderStatusBadge';
 import OrderItemsList from '../../components/orders/OrderItemsList';
 import { ROUTES } from '../../constants/routes';
+import { Card, CardContent } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { ShoppingBag, ArrowRight } from 'lucide-react';
 
 const OrdersPage = () => {
   const { orders, loading, error } = useMyOrders();
@@ -14,63 +17,66 @@ const OrdersPage = () => {
   if (loading) return <Loader fullScreen />;
 
   return (
-    <div className="page-container">
-      <h1 className="mb-2 text-2xl font-bold text-slate-900">My Orders</h1>
-      <p className="mb-8 text-sm text-slate-500">Track and view your order history</p>
+    <div className="page-container select-none">
+      <h1 className="text-3xl font-extrabold tracking-tight text-foreground">My Orders</h1>
+      <p className="mt-1 text-sm text-muted-foreground mb-8">Track payments, delivery status, and history of purchases.</p>
 
-      {error && <Alert message={error} />}
+      {error && <Alert message={error} className="mb-6" />}
 
       {!error && orders.length === 0 ? (
         <EmptyState
-          title="No orders yet"
-          description="When you place an order, it will appear here."
+          icon={ShoppingBag}
+          title="No orders placed yet"
+          description="Your purchase history will appear here once you place an order."
           action={
-            <Link to={ROUTES.HOME} className="btn-primary">
-              Start Shopping
+            <Link to={ROUTES.HOME}>
+              <Button>Start Shopping</Button>
             </Link>
           }
         />
       ) : (
         <div className="space-y-4">
           {orders.map((order) => (
-            <div key={order._id} className="card p-6">
-              <div className="flex flex-wrap items-start justify-between gap-4">
+            <Card key={order._id} className="bg-card hover:shadow-md transition-shadow border border-border">
+              <CardContent className="p-6">
+                <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border/50 pb-4 mb-4">
+                  <div>
+                    <Link
+                      to={`/orders/${order._id}`}
+                      className="font-bold text-foreground hover:text-primary transition text-base"
+                    >
+                      Order #{order._id.slice(-8).toUpperCase()}
+                    </Link>
+                    <p className="mt-1 text-xs text-muted-foreground font-semibold">{formatDate(order.createdAt)}</p>
+                  </div>
+                  <OrderStatusBadge status={order.status} />
+                </div>
+
                 <div>
-                  <Link
-                    to={`/orders/${order._id}`}
-                    className="font-semibold text-slate-900 hover:text-brand-600"
-                  >
-                    Order #{order._id.slice(-8).toUpperCase()}
-                  </Link>
-                  <p className="mt-1 text-sm text-slate-500">{formatDate(order.createdAt)}</p>
+                  <OrderItemsList items={order.orderItems.slice(0, 2)} compact />
+                  {order.orderItems.length > 2 && (
+                    <p className="mt-2 text-xs font-semibold text-muted-foreground">
+                      +{order.orderItems.length - 2} more item(s) in package
+                    </p>
+                  )}
                 </div>
-                <OrderStatusBadge status={order.status} />
-              </div>
 
-              <div className="mt-4">
-                <OrderItemsList items={order.orderItems.slice(0, 2)} compact />
-                {order.orderItems.length > 2 && (
-                  <p className="mt-2 text-sm text-slate-500">
-                    +{order.orderItems.length - 2} more item(s)
-                  </p>
-                )}
-              </div>
-
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-4">
-                <span className="text-sm text-slate-500">
-                  {order.isPaid ? '✓ Paid' : 'Unpaid'} · {order.paymentMethod}
-                </span>
-                <div className="flex items-center gap-4">
-                  <span className="text-lg font-bold">{formatPrice(order.totalPrice)}</span>
-                  <Link
-                    to={`/orders/${order._id}`}
-                    className="text-sm font-medium text-brand-600 hover:underline"
-                  >
-                    View Details →
-                  </Link>
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-border/50 pt-4 text-xs font-semibold">
+                  <span className="text-muted-foreground">
+                    Status: <span className="text-foreground">{order.isPaid ? '✓ Paid' : 'Unpaid'}</span> · Method: <span className="text-foreground">{order.paymentMethod}</span>
+                  </span>
+                  <div className="flex items-center gap-4">
+                    <span className="text-base font-extrabold text-foreground">{formatPrice(order.totalPrice)}</span>
+                    <Link to={`/orders/${order._id}`}>
+                      <Button variant="outline" size="sm" className="gap-1 h-8 text-xs font-semibold">
+                        <span>Details</span>
+                        <ArrowRight className="h-3 w-3" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}

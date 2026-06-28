@@ -4,6 +4,8 @@ import EmptyState from '../../components/common/EmptyState';
 import Loader from '../../components/common/Loader';
 import { useWishlist } from '../../context/WishlistContext';
 import { ROUTES } from '../../constants/routes';
+import { Button } from '../../components/ui/button';
+import { Heart } from 'lucide-react';
 
 const WishlistPage = () => {
   const { items, loading } = useWishlist();
@@ -11,24 +13,27 @@ const WishlistPage = () => {
   if (loading) return <Loader fullScreen />;
 
   return (
-    <div className="page-container">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div className="page-container select-none">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">My Wishlist</h1>
-          <p className="mt-1 text-sm text-slate-500">Save favourites and come back to them later.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">My Wishlist</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Review your saved items and add them to cart.</p>
         </div>
-        <Link to={ROUTES.HOME} className="btn-secondary">
-          Continue Shopping
+        <Link to={ROUTES.HOME}>
+          <Button variant="outline" size="sm">
+            Continue Shopping
+          </Button>
         </Link>
       </div>
 
       {items.length === 0 ? (
         <EmptyState
-          title="No favourites yet"
-          description="Tap the heart on any product to save it to your wishlist."
+          icon={Heart}
+          title="No favorites saved yet"
+          description="Browse products and click the heart icon on cards to save your favorites."
           action={
-            <Link to={ROUTES.HOME} className="btn-primary">
-              Browse Products
+            <Link to={ROUTES.HOME}>
+              <Button>Explore Products</Button>
             </Link>
           }
         />

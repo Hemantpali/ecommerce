@@ -1,39 +1,47 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
+import { ArrowLeft, LayoutDashboard, ShoppingCart, Tag, ShoppingBag } from 'lucide-react';
 
 const AdminLayout = () => {
   const linkClass = ({ isActive }) =>
-    `block rounded-lg px-4 py-2.5 text-sm font-medium transition ${
-      isActive ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-50'
+    `flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition duration-200 select-none ${
+      isActive
+        ? 'bg-primary text-primary-foreground shadow-sm'
+        : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
     }`;
 
   return (
     <div className="page-container">
-      <div className="mb-6">
-        <Link to={ROUTES.HOME} className="text-sm text-brand-600 hover:underline">
-          ← Back to store
+      <div className="mb-8">
+        <Link to={ROUTES.HOME} className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to store</span>
         </Link>
-        <h1 className="mt-2 text-2xl font-bold text-slate-900">Admin Dashboard</h1>
+        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground">Admin Control Panel</h1>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
-        <aside className="card h-fit p-3">
+      <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+        <aside className="card h-fit p-3 bg-card border border-border shadow-sm">
           <nav className="flex flex-col gap-1">
             <NavLink to={ROUTES.ADMIN} end className={linkClass}>
-              Overview
+              <LayoutDashboard className="h-4 w-4" />
+              <span>Overview</span>
             </NavLink>
             <NavLink to={`${ROUTES.ADMIN}/products`} className={linkClass}>
-              Products
+              <ShoppingBag className="h-4 w-4" />
+              <span>Products</span>
             </NavLink>
             <NavLink to={`${ROUTES.ADMIN}/orders`} className={linkClass}>
-              Orders
+              <ShoppingCart className="h-4 w-4" />
+              <span>Orders</span>
             </NavLink>
             <NavLink to={`${ROUTES.ADMIN}/coupons`} className={linkClass}>
-              Coupons
+              <Tag className="h-4 w-4" />
+              <span>Coupons</span>
             </NavLink>
           </nav>
         </aside>
-        <div>
+        <div className="min-w-0">
           <Outlet />
         </div>
       </div>

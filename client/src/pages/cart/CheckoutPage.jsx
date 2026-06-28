@@ -2,16 +2,23 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../components/ui/toast';
 import { orderApi } from '../../api/orderApi';
 import { couponApi } from '../../api/couponApi';
 import { formatPrice } from '../../utils/formatPrice';
 import Loader from '../../components/common/Loader';
 import Alert from '../../components/common/Alert';
 import { ROUTES } from '../../constants/routes';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Select } from '../../components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { ShieldCheck, ShoppingCart, ArrowLeft } from 'lucide-react';
 
 const CheckoutPage = () => {
   const { items, subtotal, shipping, tax, total, loading, clearCart } = useCart();
   const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -31,10 +38,10 @@ const CheckoutPage = () => {
 
   if (items.length === 0) {
     return (
-      <div className="page-container text-center">
-        <p className="text-slate-500">No items to checkout.</p>
-        <Link to={ROUTES.HOME} className="btn-primary mt-4 inline-block">
-          Go Shopping
+      <div className="page-container text-center py-16 select-none">
+        <p className="text-muted-foreground text-sm font-semibold mb-4">No items to checkout.</p>
+        <Link to={ROUTES.HOME}>
+          <Button>Go Shopping</Button>
         </Link>
       </div>
     );
@@ -84,7 +91,7 @@ const CheckoutPage = () => {
         key,
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
-        name: 'Ecommerce Store',
+        name: 'KOL Store',
         description: `Order #${orderId.slice(-8).toUpperCase()}`,
         order_id: razorpayOrder.id,
         prefill: {
@@ -92,7 +99,7 @@ const CheckoutPage = () => {
           email: user?.email || '',
         },
         theme: {
-          color: '#2563eb',
+          color: '#4f46e5', // Primary Indigo
         },
         handler: function (response) {
           paymentCompleted = true;
@@ -101,7 +108,7 @@ const CheckoutPage = () => {
         modal: {
           ondismiss: () => {
             if (!paymentCompleted) {
-              reject(new Error('Payment was cancelled'));
+              reject(new Error('Payment window closed.'));
             }
           },
         },
@@ -128,8 +135,19 @@ const CheckoutPage = () => {
       });
       setAppliedCoupon(data.data);
       setCouponCode('');
+      toast({
+        title: 'Coupon applied!',
+        description: `Successfully applied discount code: "${data.data.coupon.code}".`,
+        variant: 'success',
+      });
     } catch (err) {
-      setCouponError(err.response?.data?.message || 'Invalid coupon code');
+      const msg = err.response?.data?.message || 'Invalid coupon code';
+      setCouponError(msg);
+      toast({
+        title: 'Coupon failed',
+        description: msg,
+        variant: 'destructive',
+      });
       setAppliedCoupon(null);
     } finally {
       setValidatingCoupon(false);
@@ -139,6 +157,11 @@ const CheckoutPage = () => {
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
     setCouponError('');
+    toast({
+      title: 'Coupon removed',
+      description: 'Discount coupon has been removed from summary.',
+      variant: 'default',
+    });
   };
 
   const discountAmount = appliedCoupon?.discountAmount || 0;
@@ -152,10 +175,10 @@ const CheckoutPage = () => {
     try {
       const orderPayload = {
         shippingAddress: {
-          address: form.address,
-          city: form.city,
-          postalCode: form.postalCode,
-          country: form.country,
+          address: form.address.trim(),
+          city: form.city.trim(),
+          postalCode: form.postalCode.trim(),
+          country: form.country.trim(),
         },
         paymentMethod: form.paymentMethod,
         taxPrice: tax,
@@ -169,147 +192,222 @@ const CheckoutPage = () => {
       const { data } = await orderApi.createOrderFromCart(orderPayload);
 
       if (form.paymentMethod === 'Razorpay') {
+        toast({
+          title: 'Opening payment gateway',
+          description: 'Please complete your Razorpay payment.',
+          variant: 'default',
+        });
         await startRazorpayPayment(data.data._id);
       }
 
+      toast({
+        title: 'Order placed successfully!',
+        description: 'Thank you for shopping with us.',
+        variant: 'success',
+      });
       await clearCart();
       navigate(`/orders/${data.data._id}`);
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Checkout failed');
+      const msg = err.response?.data?.message || err.message || 'Checkout failed';
+      setError(msg);
+      toast({
+        title: 'Order placement failed',
+        description: msg,
+        variant: 'destructive',
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="page-container">
-      <h1 className="mb-8 text-2xl font-bold text-slate-900">Checkout</h1>
+    <div className="page-container select-none">
+      <Link to={ROUTES.CART} className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+        <ArrowLeft className="h-4 w-4" />
+        <span>Back to cart</span>
+      </Link>
+
+      <h1 className="mb-8 text-3xl font-extrabold tracking-tight text-foreground">Checkout</h1>
 
       {error && (
         <div className="mb-6">
-          <Alert message={error} />
+          <Alert message={error} onClose={() => setError('')} />
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-[1fr_360px]">
-        <div className="card space-y-4 p-6">
-          <h2 className="text-lg font-semibold">Shipping Address</h2>
-          {['address', 'city', 'postalCode', 'country'].map((field) => (
-            <div key={field}>
-              <label className="mb-1.5 block text-sm font-medium capitalize text-slate-700">
-                {field.replace(/([A-Z])/g, ' $1')}
-              </label>
-              <input
+      <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-[1fr_365px]">
+        {/* Shipping address form card */}
+        <Card className="bg-card shadow-sm border border-border p-6 space-y-5">
+          <div>
+            <h2 className="text-lg font-bold tracking-tight text-foreground">Shipping Details</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Please fill in your correct address for shipping.</p>
+          </div>
+          
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-foreground">Address</label>
+              <Input
                 required
-                value={form[field]}
-                onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                className="input-field"
+                value={form.address}
+                onChange={(e) => setForm({ ...form, address: e.target.value })}
+                placeholder="Apartment, Street name, House number"
               />
             </div>
-          ))}
+            
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-foreground">City</label>
+              <Input
+                required
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+                placeholder="City name"
+              />
+            </div>
+            
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-foreground">Postal Code</label>
+              <Input
+                required
+                value={form.postalCode}
+                onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
+                placeholder="6 digits PIN"
+              />
+            </div>
+            
+            <div className="sm:col-span-2">
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-foreground">Country</label>
+              <Input
+                required
+                value={form.country}
+                onChange={(e) => setForm({ ...form, country: e.target.value })}
+                placeholder="Country name"
+              />
+            </div>
+          </div>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">Payment Method</label>
-            <select
+          <div className="border-t border-border/50 pt-4">
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-foreground">Payment Method</label>
+            <Select
               value={form.paymentMethod}
               onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
-              className="input-field"
             >
-              <option value="Razorpay">Razorpay</option>
-              <option value="PayPal">PayPal</option>
+              <option value="Razorpay">Razorpay Gateway (Online)</option>
+              <option value="Cash on Delivery">Cash on Delivery (COD)</option>
               <option value="Credit Card">Credit Card</option>
-              <option value="Cash on Delivery">Cash on Delivery</option>
-            </select>
+              <option value="PayPal">PayPal</option>
+            </Select>
             {form.paymentMethod !== 'Razorpay' && (
-              <p className="mt-2 text-xs text-slate-500">
-                This method will place an unpaid order for admin follow-up.
+              <p className="mt-2 text-xs text-muted-foreground bg-secondary/50 p-2.5 rounded-lg border border-border/10 leading-normal">
+                Note: Selecting COD or direct payment will create an unpaid order pending administrator verification.
               </p>
             )}
           </div>
-        </div>
+        </Card>
 
-        <div className="card h-fit p-6">
-          <h2 className="text-lg font-semibold">Order Summary</h2>
-          <div className="mt-4 space-y-2 text-sm">
-            {items.map((item) => (
-              <div key={item._id} className="flex justify-between">
-                <span className="text-slate-500">
-                  {item.name} × {item.qty}
+        {/* Right column: Order Summary & Coupon code */}
+        <div className="space-y-6">
+          <Card className="bg-card shadow-sm border border-border">
+            <CardHeader className="border-b border-border/10 pb-4">
+              <CardTitle className="text-base flex items-center justify-between">
+                <span>Items in Order</span>
+                <span className="text-xs font-semibold text-muted-foreground bg-secondary px-2.5 py-0.5 rounded-full">
+                  {items.length} items
                 </span>
-                <span>{formatPrice(item.lineTotal || item.price * item.qty)}</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              {/* Product list */}
+              <div className="max-h-[160px] overflow-y-auto divide-y divide-border/20 pr-1">
+                {items.map((item) => (
+                  <div key={item._id} className="flex justify-between py-2.5 first:pt-0 last:pb-0 text-sm">
+                    <span className="text-muted-foreground font-medium truncate max-w-[200px]">
+                      {item.name} <span className="text-foreground font-semibold">× {item.qty}</span>
+                    </span>
+                    <span className="font-bold text-foreground shrink-0">
+                      {formatPrice(item.lineTotal || item.price * item.qty)}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
 
-            <div className="border-t border-slate-200 pt-3">
-              <div className="flex items-center gap-2">
-                <input
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  placeholder="Coupon code"
-                  className="input-field flex-1"
-                  disabled={!!appliedCoupon}
-                />
-                {appliedCoupon ? (
-                  <button
-                    type="button"
-                    onClick={handleRemoveCoupon}
-                    className="btn-secondary shrink-0 px-3 py-2 text-xs"
-                  >
-                    Remove
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleApplyCoupon}
-                    disabled={validatingCoupon || !couponCode.trim()}
-                    className="btn-primary shrink-0 px-3 py-2 text-xs"
-                  >
-                    {validatingCoupon ? '...' : 'Apply'}
-                  </button>
+              {/* Coupon inputs */}
+              <div className="border-t border-border pt-4">
+                <div className="flex gap-2">
+                  <Input
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    placeholder="Enter Coupon Code"
+                    disabled={!!appliedCoupon}
+                    className="h-9 text-xs"
+                  />
+                  {appliedCoupon ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleRemoveCoupon}
+                      className="shrink-0 h-9 px-3 text-xs border-destructive hover:bg-destructive/10 text-destructive"
+                    >
+                      Remove
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={validatingCoupon || !couponCode.trim()}
+                      className="shrink-0 h-9 px-3 text-xs"
+                    >
+                      {validatingCoupon ? '...' : 'Apply'}
+                    </Button>
+                  )}
+                </div>
+                
+                {couponError && (
+                  <p className="mt-1.5 text-xs text-destructive font-semibold">{couponError}</p>
+                )}
+                {appliedCoupon && (
+                  <p className="mt-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    <span>
+                      Coupon applied: save{' '}
+                      {appliedCoupon.coupon.type === 'percentage'
+                        ? `${appliedCoupon.coupon.value}%`
+                        : formatPrice(appliedCoupon.coupon.value)}
+                    </span>
+                  </p>
                 )}
               </div>
-              {couponError && (
-                <p className="mt-1 text-xs text-red-500">{couponError}</p>
-              )}
-              {appliedCoupon && (
-                <p className="mt-1 text-xs text-green-600">
-                  {appliedCoupon.coupon.type === 'percentage'
-                    ? `${appliedCoupon.coupon.value}% off`
-                    : `${formatPrice(appliedCoupon.coupon.value)} off`}
-                  {' — '}
-                  You save {formatPrice(discountAmount)}
-                </p>
-              )}
-            </div>
 
-            <div className="space-y-2 border-t border-slate-200 pt-3">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Subtotal</span>
-                <span>{formatPrice(subtotal)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Shipping</span>
-                <span>{shipping === 0 ? 'Free' : formatPrice(shipping)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Tax</span>
-                <span>{formatPrice(tax)}</span>
-              </div>
-              {discountAmount > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Discount</span>
-                  <span>-{formatPrice(discountAmount)}</span>
+              {/* Cost breakdown */}
+              <div className="space-y-2 border-t border-border pt-4 text-xs font-semibold">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="text-foreground">{formatPrice(subtotal)}</span>
                 </div>
-              )}
-              <div className="flex justify-between font-bold">
-                <span>Total</span>
-                <span>{formatPrice(totalAfterDiscount)}</span>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Shipping</span>
+                  <span className="text-foreground">{shipping === 0 ? 'Free' : formatPrice(shipping)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tax</span>
+                  <span className="text-foreground">{formatPrice(tax)}</span>
+                </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                    <span>Discount Code</span>
+                    <span>-{formatPrice(discountAmount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between border-t border-border/50 pt-3 text-sm font-extrabold text-foreground">
+                  <span>Grand Total</span>
+                  <span>{formatPrice(totalAfterDiscount)}</span>
+                </div>
               </div>
-            </div>
-          </div>
-          <button type="submit" disabled={submitting} className="btn-primary mt-6 w-full">
-            {submitting ? 'Placing Order...' : 'Place Order'}
-          </button>
+              
+              <Button type="submit" disabled={submitting} className="w-full font-bold h-11 mt-2">
+                {submitting ? 'Placing Order...' : 'Confirm & Place Order'}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </form>
     </div>

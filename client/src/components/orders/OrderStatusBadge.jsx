@@ -1,13 +1,20 @@
-import { STATUS_COLORS, STATUS_LABELS } from '../../constants/orderStatuses';
+import { Badge } from '../ui/badge';
+import { STATUS_LABELS } from '../../constants/orderStatuses';
 
-const OrderStatusBadge = ({ status }) => (
-  <span
-    className={`inline-block rounded-full px-3 py-1 text-xs font-semibold capitalize ${
-      STATUS_COLORS[status] || 'bg-slate-100 text-slate-800'
-    }`}
-  >
-    {STATUS_LABELS[status] || status}
-  </span>
-);
+const OrderStatusBadge = ({ status }) => {
+  const variants = {
+    pending: 'warning',
+    processing: 'secondary',
+    shipped: 'outline',
+    delivered: 'success',
+    cancelled: 'destructive',
+  };
+
+  return (
+    <Badge variant={variants[status] || 'default'} className="capitalize font-semibold select-none">
+      {STATUS_LABELS[status] || status}
+    </Badge>
+  );
+};
 
 export default OrderStatusBadge;

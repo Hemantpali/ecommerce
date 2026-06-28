@@ -1,3 +1,6 @@
+import { Button } from '../ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 const Pagination = ({ page, pages, onPageChange }) => {
   if (pages <= 1) return null;
 
@@ -6,43 +9,47 @@ const Pagination = ({ page, pages, onPageChange }) => {
   );
 
   return (
-    <div className="mt-8 flex items-center justify-center gap-1">
-      <button
+    <div className="mt-8 flex items-center justify-center gap-1.5 select-none">
+      <Button
+        variant="outline"
+        size="sm"
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1}
-        className="btn-secondary px-3 py-2 text-sm disabled:opacity-40"
+        className="flex items-center gap-1"
       >
-        Prev
-      </button>
+        <ChevronLeft className="h-4 w-4" />
+        <span className="hidden sm:inline">Previous</span>
+      </Button>
 
       {pagesToShow.map((p, idx) => {
         const prev = pagesToShow[idx - 1];
         const showEllipsis = prev && p - prev > 1;
 
         return (
-          <span key={p} className="flex items-center gap-1">
-            {showEllipsis && <span className="px-2 text-slate-400">…</span>}
-            <button
+          <span key={p} className="flex items-center gap-1.5">
+            {showEllipsis && <span className="px-2 text-muted-foreground">…</span>}
+            <Button
+              variant={p === page ? 'default' : 'outline'}
+              size="sm"
               onClick={() => onPageChange(p)}
-              className={`min-w-[40px] rounded-lg px-3 py-2 text-sm font-medium transition ${
-                p === page
-                  ? 'bg-brand-600 text-white'
-                  : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-              }`}
+              className="w-9 h-9 p-0 font-medium"
             >
               {p}
-            </button>
+            </Button>
           </span>
         );
       })}
 
-      <button
+      <Button
+        variant="outline"
+        size="sm"
         onClick={() => onPageChange(page + 1)}
         disabled={page >= pages}
-        className="btn-secondary px-3 py-2 text-sm disabled:opacity-40"
+        className="flex items-center gap-1"
       >
-        Next
-      </button>
+        <span className="hidden sm:inline">Next</span>
+        <ChevronRight className="h-4 w-4" />
+      </Button>
     </div>
   );
 };

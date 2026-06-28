@@ -1,13 +1,19 @@
 import { useState } from 'react';
 import { productApi } from '../../api/productApi';
 import { useProducts, useCategories } from '../../hooks/useProducts';
+import { useToast } from '../../components/ui/toast';
 import { formatPrice } from '../../utils/formatPrice';
 import ProductForm, { EMPTY_PRODUCT_FORM } from '../../components/products/ProductForm';
 import Loader from '../../components/common/Loader';
 import Alert from '../../components/common/Alert';
 import EmptyState from '../../components/common/EmptyState';
+import { Card, CardContent } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
+import { ShoppingBag, Edit, Trash2 } from 'lucide-react';
 
 const AdminProducts = () => {
+  const { toast } = useToast();
   const [form, setForm] = useState(EMPTY_PRODUCT_FORM);
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -89,15 +95,33 @@ const AdminProducts = () => {
 
       if (editingId) {
         await productApi.updateProduct(editingId, payload);
-        setSuccess('Product updated successfully');
+        const successMsg = `Product "${payload.name}" updated successfully`;
+        setSuccess(successMsg);
+        toast({
+          title: 'Product updated',
+          description: successMsg,
+          variant: 'success',
+        });
       } else {
         await productApi.createProduct(payload);
-        setSuccess('Product added successfully');
+        const successMsg = `Product "${payload.name}" added successfully`;
+        setSuccess(successMsg);
+        toast({
+          title: 'Product added',
+          description: successMsg,
+          variant: 'success',
+        });
       }
       closeForm();
       refetch();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to save product');
+      const errMsg = err.response?.data?.message || 'Failed to save product';
+      setError(errMsg);
+      toast({
+        title: 'Save failed',
+        description: errMsg,
+        variant: 'destructive',
+      });
     } finally {
       setSaving(false);
     }
@@ -110,27 +134,39 @@ const AdminProducts = () => {
     setDeletingId(id);
     try {
       await productApi.deleteProduct(id);
-      setSuccess('Product deleted successfully');
+      const successMsg = `Product "${name}" deleted successfully`;
+      setSuccess(successMsg);
+      toast({
+        title: 'Product deleted',
+        description: successMsg,
+        variant: 'default',
+      });
       if (editingId === id) closeForm();
       refetch();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to delete product');
+      const errMsg = err.response?.data?.message || 'Failed to delete product';
+      setError(errMsg);
+      toast({
+        title: 'Delete failed',
+        description: errMsg,
+        variant: 'destructive',
+      });
     } finally {
       setDeletingId(null);
     }
   };
 
   return (
-    <div>
+    <div className="select-none">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">Manage Products</h2>
-          <p className="mt-1 text-sm text-slate-500">{products.length} products in catalog</p>
+          <h2 className="text-xl font-bold text-foreground">Manage Products</h2>
+          <p className="mt-1 text-xs font-semibold text-muted-foreground">{products.length} products in catalog</p>
         </div>
         {!showForm && (
-          <button onClick={openCreate} className="btn-primary">
+          <Button onClick={openCreate} size="sm">
             + Add Product
-          </button>
+          </Button>
         )}
       </div>
 
@@ -146,100 +182,111 @@ const AdminProducts = () => {
       )}
 
       {showForm && (
-        <div className="card mb-6 p-6">
-          <h3 className="mb-4 text-lg font-semibold text-slate-900">
-            {editingId ? 'Edit Product' : 'Add New Product'}
-          </h3>
-          <ProductForm
-            form={form}
-            categories={categories}
-            saving={saving}
-            editing={!!editingId}
-            onChange={handleChange}
-            onImageFileChange={handleImageFileChange}
-            onSubmit={handleSubmit}
-            onCancel={closeForm}
-          />
-        </div>
+        <Card className="mb-6 border border-border bg-card shadow-sm">
+          <CardContent className="p-6">
+            <h3 className="mb-5 text-base font-bold text-foreground">
+              {editingId ? 'Edit Product Catalog Details' : 'Add New Catalog Product'}
+            </h3>
+            <ProductForm
+              form={form}
+              categories={categories}
+              saving={saving}
+              editing={!!editingId}
+              onChange={handleChange}
+              onImageFileChange={handleImageFileChange}
+              onSubmit={handleSubmit}
+              onCancel={closeForm}
+            />
+          </CardContent>
+        </Card>
       )}
 
       {loading ? (
         <Loader />
       ) : products.length === 0 ? (
         <EmptyState
+          icon={ShoppingBag}
           title="No products yet"
-          description="Add your first product to start selling."
+          description="Add your first catalog product to start selling."
           action={
-            <button onClick={openCreate} className="btn-primary">
+            <Button onClick={openCreate}>
               Add Product
-            </button>
+            </Button>
           }
         />
       ) : (
-        <div className="card overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50">
-              <tr>
-                <th className="px-4 py-3 font-medium">Product</th>
-                <th className="px-4 py-3 font-medium">Category</th>
-                <th className="px-4 py-3 font-medium">Price</th>
-                <th className="px-4 py-3 font-medium">Stock</th>
-                <th className="px-4 py-3 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {products.map((product) => (
-                <tr key={product._id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="h-10 w-10 rounded-lg object-cover"
-                        onError={(e) => {
-                          e.target.src = 'https://placehold.co/40x40/e2e8f0/64748b?text=P';
-                        }}
-                      />
-                      <span className="font-medium text-slate-900">{product.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                      {product.category}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 font-medium">{formatPrice(product.price)}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={
-                        product.countInStock > 0 ? 'text-green-600' : 'text-red-500'
-                      }
-                    >
-                      {product.countInStock}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => openEdit(product)}
-                        className="font-medium text-brand-600 hover:underline"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product._id, product.name)}
-                        disabled={deletingId === product._id}
-                        className="font-medium text-red-500 hover:underline disabled:opacity-50"
-                      >
-                        {deletingId === product._id ? 'Deleting...' : 'Delete'}
-                      </button>
-                    </div>
-                  </td>
+        <Card className="overflow-hidden border border-border bg-card shadow-sm">
+          <CardContent className="p-0 overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left text-xs font-semibold select-none">
+              <thead className="border-b border-border bg-secondary/35 text-muted-foreground uppercase tracking-wider">
+                <tr>
+                  <th className="px-4 py-3.5 font-bold">Product</th>
+                  <th className="px-4 py-3.5 font-bold">Category</th>
+                  <th className="px-4 py-3.5 font-bold">Price</th>
+                  <th className="px-4 py-3.5 font-bold">Stock</th>
+                  <th className="px-4 py-3.5 font-bold">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-border/40">
+                {products.map((product) => (
+                  <tr key={product._id} className="hover:bg-secondary/15 transition-colors">
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="h-10 w-10 rounded-lg object-cover bg-secondary border border-border/20"
+                          onError={(e) => {
+                            e.target.src = 'https://placehold.co/40x40/e2e8f0/64748b?text=P';
+                          }}
+                        />
+                        <span className="font-bold text-foreground max-w-[240px] truncate block">{product.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <Badge variant="outline" className="px-2 py-0.5">
+                        {product.category}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3.5 font-bold text-foreground text-sm">{formatPrice(product.price)}</td>
+                    <td className="px-4 py-3.5">
+                      <span
+                        className={
+                          product.countInStock > 0 ? 'text-emerald-500 font-bold' : 'text-red-500 font-bold'
+                        }
+                      >
+                        {product.countInStock > 0 ? `${product.countInStock} units` : 'Out of stock'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openEdit(product)}
+                          className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-secondary"
+                          aria-label="Edit product"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(product._id, product.name)}
+                          disabled={deletingId === product._id}
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                          aria-label="Delete product"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

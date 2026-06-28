@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { orderApi } from '../../api/orderApi';
 import { useAllOrders } from '../../hooks/useOrders';
+import { useToast } from '../../components/ui/toast';
 import { formatPrice, formatDate } from '../../utils/formatPrice';
 import { ORDER_STATUSES, STATUS_LABELS } from '../../constants/orderStatuses';
 import Loader from '../../components/common/Loader';
@@ -8,8 +9,14 @@ import Alert from '../../components/common/Alert';
 import OrderStatusBadge from '../../components/orders/OrderStatusBadge';
 import OrderItemsList from '../../components/orders/OrderItemsList';
 import OrderSummary from '../../components/orders/OrderSummary';
+import { Card, CardContent } from '../../components/ui/card';
+import { Select } from '../../components/ui/select';
+import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
+import { ChevronDown, ChevronUp, RefreshCw, ShoppingCart } from 'lucide-react';
 
 const AdminOrders = () => {
+  const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -33,10 +40,22 @@ const AdminOrders = () => {
     setError('');
     try {
       await orderApi.updateOrderStatus(id, status);
-      setSuccess('Order status updated successfully');
+      const successMsg = `Order status updated to ${STATUS_LABELS[status]} successfully.`;
+      setSuccess(successMsg);
+      toast({
+        title: 'Status updated',
+        description: successMsg,
+        variant: 'success',
+      });
       refetch();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update status');
+      const errMsg = err.response?.data?.message || 'Failed to update status';
+      setError(errMsg);
+      toast({
+        title: 'Update failed',
+        description: errMsg,
+        variant: 'destructive',
+      });
     } finally {
       setUpdatingId(null);
     }
@@ -45,39 +64,49 @@ const AdminOrders = () => {
   const displayError = error || fetchError;
 
   return (
-    <div>
+    <div className="select-none">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">Manage Orders</h2>
-          <p className="mt-1 text-sm text-slate-500">{allOrders.length} total orders</p>
+          <h2 className="text-xl font-bold text-foreground">Manage Orders</h2>
+          <p className="mt-1 text-xs font-semibold text-muted-foreground">{allOrders.length} orders total</p>
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="input-field w-44"
-        >
-          <option value="">All Statuses</option>
-          {ORDER_STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {STATUS_LABELS[s]}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={refetch} className="h-10 w-10">
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+          <Select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-44"
+          >
+            <option value="">All Statuses</option>
+            {ORDER_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {STATUS_LABELS[s]}
+              </option>
+            ))}
+          </Select>
+        </div>
       </div>
 
+      {/* Metric Status Buttons */}
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
-        {ORDER_STATUSES.map((status) => (
-          <button
-            key={status}
-            onClick={() => setStatusFilter(statusFilter === status ? '' : status)}
-            className={`card p-3 text-left transition ${
-              statusFilter === status ? 'ring-2 ring-brand-500' : 'hover:shadow-md'
-            }`}
-          >
-            <p className="text-xs text-slate-500">{STATUS_LABELS[status]}</p>
-            <p className="text-lg font-bold text-slate-900">{statusCounts[status] || 0}</p>
-          </button>
-        ))}
+        {ORDER_STATUSES.map((status) => {
+          const isActive = statusFilter === status;
+          return (
+            <button
+              key={status}
+              type="button"
+              onClick={() => setStatusFilter(isActive ? '' : status)}
+              className={`card p-4 text-left border transition-all duration-200 select-none ${
+                isActive ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-muted-foreground/30 hover:shadow-sm'
+              }`}
+            >
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{STATUS_LABELS[status]}</p>
+              <p className="text-xl font-extrabold text-foreground mt-1">{statusCounts[status] || 0}</p>
+            </button>
+          );
+        })}
       </div>
 
       {displayError && (
@@ -94,81 +123,104 @@ const AdminOrders = () => {
       {loading ? (
         <Loader />
       ) : orders.length === 0 ? (
-        <div className="card py-12 text-center text-slate-500">No orders found.</div>
+        <Card className="py-16 text-center border border-dashed border-border/80 bg-card/45">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-muted-foreground mx-auto mb-4">
+            <ShoppingCart className="h-6 w-6" />
+          </div>
+          <p className="text-sm font-bold text-foreground">No orders found</p>
+          <p className="text-xs text-muted-foreground mt-1 leading-normal">There are no orders listed matching this criteria.</p>
+        </Card>
       ) : (
         <div className="space-y-4">
-          {orders.map((order) => (
-            <div key={order._id} className="card overflow-hidden">
-              <div className="p-6">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <p className="font-semibold text-slate-900">
-                        #{order._id.slice(-8).toUpperCase()}
-                      </p>
-                      <OrderStatusBadge status={order.status} />
-                    </div>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {order.user?.name} · {order.user?.email}
-                    </p>
-                    <p className="text-sm text-slate-500">{formatDate(order.createdAt)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold">{formatPrice(order.totalPrice)}</p>
-                    <p className="text-sm text-slate-500">{order.orderItems.length} items</p>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <label className="text-sm font-medium text-slate-700">Update status:</label>
-                  <select
-                    value={order.status}
-                    onChange={(e) => updateStatus(order._id, e.target.value)}
-                    disabled={updatingId === order._id}
-                    className="input-field w-44"
-                  >
-                    {ORDER_STATUSES.map((s) => (
-                      <option key={s} value={s}>
-                        {STATUS_LABELS[s]}
-                      </option>
-                    ))}
-                  </select>
-                  <span className={`text-sm ${order.isPaid ? 'text-green-600' : 'text-yellow-600'}`}>
-                    {order.isPaid ? 'Paid' : 'Unpaid'}
-                  </span>
-                  <button
-                    onClick={() => setExpandedId(expandedId === order._id ? null : order._id)}
-                    className="ml-auto text-sm font-medium text-brand-600 hover:underline"
-                  >
-                    {expandedId === order._id ? 'Hide details' : 'View details'}
-                  </button>
-                </div>
-              </div>
-
-              {expandedId === order._id && (
-                <div className="border-t border-slate-200 bg-slate-50 p-6">
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    <div>
-                      <h4 className="mb-3 text-sm font-semibold text-slate-900">Items</h4>
-                      <OrderItemsList items={order.orderItems} compact />
-                    </div>
-                    <div>
-                      <h4 className="mb-3 text-sm font-semibold text-slate-900">Summary</h4>
-                      <OrderSummary order={order} />
-                      <div className="mt-4 text-sm text-slate-600">
-                        <p className="font-medium text-slate-900">Ship to:</p>
-                        <p>{order.shippingAddress.address}</p>
-                        <p>
-                          {order.shippingAddress.city}, {order.shippingAddress.postalCode}
+          {orders.map((order) => {
+            const isExpanded = expandedId === order._id;
+            return (
+              <Card key={order._id} className="overflow-hidden border border-border bg-card shadow-sm">
+                <CardContent className="p-0">
+                  <div className="p-6">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-3">
+                          <p className="font-extrabold text-base text-foreground">
+                            #{order._id.slice(-8).toUpperCase()}
+                          </p>
+                          <OrderStatusBadge status={order.status} />
+                        </div>
+                        <p className="mt-1.5 text-xs text-muted-foreground font-semibold">
+                          Customer: <span className="text-foreground">{order.user?.name || 'Unknown'}</span> ({order.user?.email || 'No email'})
                         </p>
-                        <p>{order.shippingAddress.country}</p>
+                        <p className="text-[10px] text-muted-foreground font-bold mt-1 uppercase tracking-wider">{formatDate(order.createdAt)}</p>
+                      </div>
+                      <div className="text-right flex flex-col items-end">
+                        <p className="text-base font-extrabold text-foreground">{formatPrice(order.totalPrice)}</p>
+                        <p className="text-xs text-muted-foreground font-semibold mt-0.5">{order.orderItems.length} items</p>
                       </div>
                     </div>
+
+                    <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-border/40 pt-4 text-xs font-semibold">
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">Update status:</span>
+                        <Select
+                          value={order.status}
+                          onChange={(e) => updateStatus(order._id, e.target.value)}
+                          disabled={updatingId === order._id}
+                          className="w-36 h-9"
+                        >
+                          {ORDER_STATUSES.map((s) => (
+                            <option key={s} value={s}>
+                              {STATUS_LABELS[s]}
+                            </option>
+                          ))}
+                        </Select>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">Payment:</span>
+                        <Badge variant={order.isPaid ? 'success' : 'warning'} className="px-2 py-0.2">
+                          {order.isPaid ? 'Paid' : 'Unpaid'}
+                        </Badge>
+                      </div>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setExpandedId(isExpanded ? null : order._id)}
+                        className="ml-auto text-xs gap-1 hover:bg-secondary h-8"
+                      >
+                        <span>{isExpanded ? 'Hide Details' : 'View Details'}</span>
+                        {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          ))}
+
+                  {isExpanded && (
+                    <div className="border-t border-border/80 bg-secondary/35 p-6 animate-in fade-in duration-200">
+                      <div className="grid gap-6 lg:grid-cols-2">
+                        <div>
+                          <h4 className="mb-3 text-xs font-bold text-foreground uppercase tracking-wider">Ordered Items</h4>
+                          <OrderItemsList items={order.orderItems} compact />
+                        </div>
+                        <div className="space-y-6">
+                          <div>
+                            <h4 className="mb-3 text-xs font-bold text-foreground uppercase tracking-wider">Order Summary</h4>
+                            <OrderSummary order={order} />
+                          </div>
+                          <div className="text-xs font-semibold text-muted-foreground">
+                            <p className="font-bold text-foreground uppercase tracking-wider mb-2">Ship To:</p>
+                            <p className="text-foreground">{order.shippingAddress?.address}</p>
+                            <p className="mt-0.5">
+                              {order.shippingAddress?.city}, {order.shippingAddress?.postalCode}
+                            </p>
+                            <p className="mt-0.5">{order.shippingAddress?.country}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
