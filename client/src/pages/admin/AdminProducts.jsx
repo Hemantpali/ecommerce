@@ -10,6 +10,7 @@ import EmptyState from '../../components/common/EmptyState';
 import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
+import { Dialog, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '../../components/ui/dialog';
 import { ShoppingBag, Edit, Trash2 } from 'lucide-react';
 
 const AdminProducts = () => {
@@ -20,6 +21,7 @@ const AdminProducts = () => {
   const [saving, setSaving] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -128,8 +130,6 @@ const AdminProducts = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
-
     clearMessages();
     setDeletingId(id);
     try {
@@ -157,7 +157,7 @@ const AdminProducts = () => {
   };
 
   return (
-    <div className="select-none">
+    <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-foreground">Manage Products</h2>
@@ -217,7 +217,7 @@ const AdminProducts = () => {
       ) : (
         <Card className="overflow-hidden border border-border bg-card shadow-sm">
           <CardContent className="p-0 overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-xs font-semibold select-none">
+            <table className="w-full min-w-[640px] text-left text-xs font-semibold">
               <thead className="border-b border-border bg-secondary/35 text-muted-foreground uppercase tracking-wider">
                 <tr>
                   <th className="px-4 py-3.5 font-bold">Product</th>
@@ -272,7 +272,7 @@ const AdminProducts = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDelete(product._id, product.name)}
+                          onClick={() => setConfirmDelete({ id: product._id, name: product.name })}
                           disabled={deletingId === product._id}
                           className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                           aria-label="Delete product"
@@ -288,6 +288,29 @@ const AdminProducts = () => {
           </CardContent>
         </Card>
       )}
+      <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
+        <DialogHeader>
+          <DialogTitle>Delete Product</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete &ldquo;{confirmDelete?.name}&rdquo;? This cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setConfirmDelete(null)}>
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            disabled={deletingId === confirmDelete?.id}
+            onClick={() => {
+              handleDelete(confirmDelete.id, confirmDelete.name);
+              setConfirmDelete(null);
+            }}
+          >
+            {deletingId === confirmDelete?.id ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
 };

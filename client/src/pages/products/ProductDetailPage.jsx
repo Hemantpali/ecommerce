@@ -177,7 +177,7 @@ const ProductDetailPage = () => {
   const wished = isWishlisted(product._id);
 
   return (
-    <div className="page-container select-none">
+    <div className="page-container">
       <Link to={ROUTES.HOME} className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
         <ArrowLeft className="h-4 w-4" />
         <span>Back to shop</span>

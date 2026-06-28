@@ -17,7 +17,7 @@ const OrdersPage = () => {
   if (loading) return <Loader fullScreen />;
 
   return (
-    <div className="page-container select-none">
+    <div className="page-container">
       <h1 className="text-3xl font-extrabold tracking-tight text-foreground">My Orders</h1>
       <p className="mt-1 text-sm text-muted-foreground mb-8">Track payments, delivery status, and history of purchases.</p>
 

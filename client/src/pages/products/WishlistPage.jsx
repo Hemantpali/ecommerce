@@ -13,7 +13,7 @@ const WishlistPage = () => {
   if (loading) return <Loader fullScreen />;
 
   return (
-    <div className="page-container select-none">
+    <div className="page-container">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">My Wishlist</h1>

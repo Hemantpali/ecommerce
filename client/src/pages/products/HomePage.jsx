@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useProducts, useCategories } from '../../hooks/useProducts';
@@ -55,6 +55,24 @@ const HomePage = () => {
     setSearchParams({});
   };
 
+  const resultsRef = useRef(null);
+  const isFirstRender = useRef(true);
+  const hasActiveFilters = keyword || category;
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      if (hasActiveFilters) {
+        const timer = setTimeout(() => {
+          resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+        return () => clearTimeout(timer);
+      }
+      return;
+    }
+    resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [keyword, category, sort]);
+
   const handlePageChange = (newPage) => {
     updateParams({ page: newPage.toString() });
   };
@@ -69,16 +87,18 @@ const HomePage = () => {
         error={featuredError}
       />
 
-      <ProductFilters
-        keyword={keyword}
-        category={category}
-        sort={sort}
-        categories={categories}
-        onKeywordChange={handleKeywordChange}
-        onCategoryChange={handleCategoryChange}
-        onSortChange={handleSortChange}
-        onClear={handleClearFilters}
-      />
+      <div ref={resultsRef}>
+        <ProductFilters
+          keyword={keyword}
+          category={category}
+          sort={sort}
+          categories={categories}
+          onKeywordChange={handleKeywordChange}
+          onCategoryChange={handleCategoryChange}
+          onSortChange={handleSortChange}
+          onClear={handleClearFilters}
+        />
+      </div>
 
       {error && (
         <div className="mb-6">

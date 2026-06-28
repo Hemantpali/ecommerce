@@ -88,7 +88,7 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="space-y-6 select-none">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <span className="text-xs font-semibold uppercase tracking-wider text-primary">Store health</span>

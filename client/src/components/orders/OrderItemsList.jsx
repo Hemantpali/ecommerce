@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { formatPrice } from '../../utils/formatPrice';
 
 const OrderItemsList = ({ items, compact = false }) => (
-  <div className="divide-y divide-slate-100">
+  <div className="divide-y divide-border">
     {items.map((item, idx) => (
       <div key={idx} className={`flex items-center gap-4 ${compact ? 'py-2' : 'py-3'}`}>
         <img
@@ -17,14 +17,14 @@ const OrderItemsList = ({ items, compact = false }) => (
           {item.product?._id ? (
             <Link
               to={`/products/${item.product._id}`}
-              className="font-medium text-slate-900 hover:text-brand-600 truncate block"
+              className="font-medium text-foreground hover:text-primary truncate block"
             >
               {item.name}
             </Link>
           ) : (
-            <p className="font-medium text-slate-900 truncate">{item.name}</p>
+            <p className="font-medium text-foreground truncate">{item.name}</p>
           )}
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             {formatPrice(item.price)} × {item.qty}
           </p>
         </div>

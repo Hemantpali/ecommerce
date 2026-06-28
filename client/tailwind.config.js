@@ -11,6 +11,15 @@ export default {
       },
     },
     extend: {
+      width: {
+        18: '4.5rem',
+      },
+      height: {
+        '4.5': '1.125rem',
+      },
+      scale: {
+        102: '1.02',
+      },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },

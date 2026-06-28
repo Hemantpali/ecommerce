@@ -13,6 +13,7 @@ import CartPage from '../pages/cart/CartPage';
 import CheckoutPage from '../pages/cart/CheckoutPage';
 import OrdersPage from '../pages/orders/OrdersPage';
 import OrderDetailPage from '../pages/orders/OrderDetailPage';
+import NotFoundPage from '../pages/NotFoundPage';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import AdminProducts from '../pages/admin/AdminProducts';
 import AdminOrders from '../pages/admin/AdminOrders';
@@ -74,6 +75,7 @@ const AppRouter = () => (
           <Route path="orders" element={<AdminOrders />} />
           <Route path="coupons" element={<AdminCoupons />} />
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   </BrowserRouter>

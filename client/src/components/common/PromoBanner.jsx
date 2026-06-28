@@ -7,19 +7,19 @@ const promos = [
     title: 'Flash Sale Live',
     message: 'Save up to 50% on bestselling picks for a limited time.',
     cta: 'Shop Deals',
-    gradient: 'from-rose-500 via-pink-500 to-indigo-600 dark:from-rose-650 dark:via-pink-650 dark:to-indigo-800',
+    gradient: 'from-rose-500 via-pink-500 to-indigo-600 dark:from-rose-600 dark:via-pink-600 dark:to-indigo-800',
   },
   {
     title: 'Use Coupon FRESH20',
     message: 'Take 20% off your next order with code FRESH20 at checkout.',
     cta: 'Apply Coupon',
-    gradient: 'from-emerald-500 via-teal-500 to-cyan-600 dark:from-emerald-650 dark:via-teal-650 dark:to-cyan-800',
+    gradient: 'from-emerald-500 via-teal-500 to-cyan-600 dark:from-emerald-600 dark:via-teal-600 dark:to-cyan-800',
   },
   {
     title: 'New Arrivals',
     message: 'Explore the latest collection handpicked for your everyday lifestyle.',
     cta: 'Discover New',
-    gradient: 'from-indigo-600 via-purple-500 to-pink-500 dark:from-indigo-850 dark:via-purple-750 dark:to-pink-700',
+    gradient: 'from-indigo-600 via-purple-500 to-pink-500 dark:from-indigo-800 dark:via-purple-700 dark:to-pink-700',
   },
   {
     title: 'Weekend Special Offers',

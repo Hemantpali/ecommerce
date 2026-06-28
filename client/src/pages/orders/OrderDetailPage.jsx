@@ -23,7 +23,7 @@ const OrderDetailPage = () => {
   const { shippingAddress } = order;
 
   return (
-    <div className="page-container select-none">
+    <div className="page-container">
       <Link to={ROUTES.ORDERS} className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
         <ArrowLeft className="h-4 w-4" />
         <span>Back to orders</span>
@@ -82,7 +82,7 @@ const OrderDetailPage = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Payment Status</span>
-                <Badge variant={order.isPaid ? 'success' : 'warning'} className="px-2 py-0.2">
+                <Badge variant={order.isPaid ? 'success' : 'warning'} className="px-2 py-0.5">
                   {order.isPaid ? 'Paid' : 'Unpaid'}
                 </Badge>
               </div>

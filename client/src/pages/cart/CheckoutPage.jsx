@@ -13,7 +13,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Select } from '../../components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { ShieldCheck, ShoppingCart, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, ArrowLeft } from 'lucide-react';
 
 const CheckoutPage = () => {
   const { items, subtotal, shipping, tax, total, loading, clearCart } = useCart();
@@ -38,7 +38,7 @@ const CheckoutPage = () => {
 
   if (items.length === 0) {
     return (
-      <div className="page-container text-center py-16 select-none">
+      <div className="page-container text-center py-16">
         <p className="text-muted-foreground text-sm font-semibold mb-4">No items to checkout.</p>
         <Link to={ROUTES.HOME}>
           <Button>Go Shopping</Button>
@@ -221,7 +221,7 @@ const CheckoutPage = () => {
   };
 
   return (
-    <div className="page-container select-none">
+    <div className="page-container">
       <Link to={ROUTES.CART} className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
         <ArrowLeft className="h-4 w-4" />
         <span>Back to cart</span>
@@ -293,8 +293,6 @@ const CheckoutPage = () => {
             >
               <option value="Razorpay">Razorpay Gateway (Online)</option>
               <option value="Cash on Delivery">Cash on Delivery (COD)</option>
-              <option value="Credit Card">Credit Card</option>
-              <option value="PayPal">PayPal</option>
             </Select>
             {form.paymentMethod !== 'Razorpay' && (
               <p className="mt-2 text-xs text-muted-foreground bg-secondary/50 p-2.5 rounded-lg border border-border/10 leading-normal">

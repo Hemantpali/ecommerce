@@ -53,7 +53,7 @@ const CartPage = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="page-container select-none">
+      <div className="page-container">
         <h1 className="mb-8 text-3xl font-extrabold tracking-tight text-foreground">Shopping Cart</h1>
         <EmptyState
           icon={Lock}
@@ -73,7 +73,7 @@ const CartPage = () => {
 
   if (items.length === 0) {
     return (
-      <div className="page-container select-none">
+      <div className="page-container">
         <h1 className="mb-8 text-3xl font-extrabold tracking-tight text-foreground">Shopping Cart</h1>
         <EmptyState
           icon={ShoppingBag}
@@ -90,7 +90,7 @@ const CartPage = () => {
   }
 
   return (
-    <div className="page-container select-none">
+    <div className="page-container">
       <h1 className="mb-8 text-3xl font-extrabold tracking-tight text-foreground">Shopping Cart</h1>
 
       <div className="grid gap-8 lg:grid-cols-[1fr_365px]">

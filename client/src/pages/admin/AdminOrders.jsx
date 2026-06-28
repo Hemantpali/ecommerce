@@ -64,7 +64,7 @@ const AdminOrders = () => {
   const displayError = error || fetchError;
 
   return (
-    <div className="select-none">
+    <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-foreground">Manage Orders</h2>
@@ -98,7 +98,7 @@ const AdminOrders = () => {
               key={status}
               type="button"
               onClick={() => setStatusFilter(isActive ? '' : status)}
-              className={`card p-4 text-left border transition-all duration-200 select-none ${
+              className={`card p-4 text-left border transition-all duration-200 ${
                 isActive ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-muted-foreground/30 hover:shadow-sm'
               }`}
             >
@@ -176,7 +176,7 @@ const AdminOrders = () => {
                       
                       <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">Payment:</span>
-                        <Badge variant={order.isPaid ? 'success' : 'warning'} className="px-2 py-0.2">
+                        <Badge variant={order.isPaid ? 'success' : 'warning'} className="px-2 py-0.5">
                           {order.isPaid ? 'Paid' : 'Unpaid'}
                         </Badge>
                       </div>

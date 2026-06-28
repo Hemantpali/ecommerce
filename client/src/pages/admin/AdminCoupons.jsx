@@ -10,7 +10,8 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Select } from '../../components/ui/select';
 import { Badge } from '../../components/ui/badge';
-import { Tag, Edit, Trash2, Calendar, ShoppingCart } from 'lucide-react';
+import { Dialog, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '../../components/ui/dialog';
+import { Tag, Edit, Trash2 } from 'lucide-react';
 
 const EMPTY_FORM = {
   code: '',
@@ -30,6 +31,7 @@ const AdminCoupons = () => {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -167,8 +169,6 @@ const AdminCoupons = () => {
   };
 
   const handleDelete = async (id, code) => {
-    if (!window.confirm(`Delete coupon "${code}"? This cannot be undone.`)) return;
-
     clearMessages();
     try {
       await couponApi.deleteCoupon(id);
@@ -200,7 +200,7 @@ const AdminCoupons = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="select-none">
+    <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-foreground">Manage Coupons</h2>
@@ -347,7 +347,7 @@ const AdminCoupons = () => {
       ) : (
         <Card className="overflow-hidden border border-border bg-card shadow-sm">
           <CardContent className="p-0 overflow-x-auto">
-            <table className="w-full min-w-[700px] text-left text-xs font-semibold select-none">
+            <table className="w-full min-w-[700px] text-left text-xs font-semibold">
               <thead className="border-b border-border bg-secondary/35 text-muted-foreground uppercase tracking-wider">
                 <tr>
                   <th className="px-4 py-3.5 font-bold">Code</th>
@@ -394,7 +394,7 @@ const AdminCoupons = () => {
                         <button
                           type="button"
                           onClick={() => handleToggleActive(coupon)}
-                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase transition select-none tracking-wider ${
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase transition tracking-wider ${
                             coupon.isActive && !expired
                               ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                               : 'bg-secondary text-muted-foreground'
@@ -417,7 +417,7 @@ const AdminCoupons = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDelete(coupon._id, coupon.code)}
+                            onClick={() => setConfirmDelete({ id: coupon._id, code: coupon.code })}
                             className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             aria-label="Delete coupon"
                           >
@@ -433,6 +433,29 @@ const AdminCoupons = () => {
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
+        <DialogHeader>
+          <DialogTitle>Delete Coupon</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete coupon &ldquo;{confirmDelete?.code}&rdquo;? This cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setConfirmDelete(null)}>
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              handleDelete(confirmDelete.id, confirmDelete.code);
+              setConfirmDelete(null);
+            }}
+          >
+            Delete
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
 };

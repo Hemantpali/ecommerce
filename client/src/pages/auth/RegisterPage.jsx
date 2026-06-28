@@ -54,7 +54,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="page-container flex min-h-[70vh] items-center justify-center select-none">
+    <div className="page-container flex min-h-[70vh] items-center justify-center">
       <Card className="w-full max-w-md bg-card shadow-lg border border-border">
         <CardHeader className="text-center pb-4">
           <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
