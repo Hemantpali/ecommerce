@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useProducts, useCategories } from '../../hooks/useProducts';
 import PromoBanner from '../../components/common/PromoBanner';
@@ -8,10 +9,11 @@ import ProductList from '../../components/products/ProductList';
 import Alert from '../../components/common/Alert';
 
 const HomePage = () => {
-  const [keyword, setKeyword] = useState('');
-  const [category, setCategory] = useState('');
-  const [sort, setSort] = useState('newest');
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const keyword = searchParams.get('search') || '';
+  const category = searchParams.get('category') || '';
+  const sort = searchParams.get('sort') || 'newest';
+  const page = parseInt(searchParams.get('page') || '1', 10);
   const debouncedKeyword = useDebounce(keyword);
 
   const { categories } = useCategories();
@@ -28,25 +30,33 @@ const HomePage = () => {
     error: featuredError,
   } = useProducts({ sort: 'rating', limit: 8 });
 
+  const updateParams = (updates) => {
+    const newParams = new URLSearchParams(searchParams);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) newParams.set(key, value);
+      else newParams.delete(key);
+    });
+    setSearchParams(newParams);
+  };
+
   const handleKeywordChange = (value) => {
-    setKeyword(value);
-    setPage(1);
+    updateParams({ search: value, page: '1' });
   };
 
   const handleCategoryChange = (value) => {
-    setCategory(value);
-    setPage(1);
+    updateParams({ category: value, page: '1' });
   };
 
   const handleSortChange = (value) => {
-    setSort(value);
-    setPage(1);
+    updateParams({ sort: value, page: '1' });
   };
 
   const handleClearFilters = () => {
-    setKeyword('');
-    setCategory('');
-    setPage(1);
+    setSearchParams({});
+  };
+
+  const handlePageChange = (newPage) => {
+    updateParams({ page: newPage.toString() });
   };
 
   return (
@@ -81,7 +91,7 @@ const HomePage = () => {
         loading={loading}
         meta={meta}
         page={page}
-        onPageChange={setPage}
+        onPageChange={handlePageChange}
       />
     </div>
   );

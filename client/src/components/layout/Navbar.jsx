@@ -1,9 +1,12 @@
 import { Link, NavLink, useNavigate, useSearchParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useTheme } from '../../context/ThemeContext';
+import { productApi } from '../../api/productApi';
+import { formatPrice } from '../../utils/formatPrice';
+import { useDebounce } from '../../hooks/useDebounce';
 import { ROUTES } from '../../constants/routes';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -19,7 +22,8 @@ import {
   Package,
   Shield,
   ShoppingBag,
-  Search
+  Search,
+  Loader2
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -34,19 +38,95 @@ const Navbar = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState(searchParams.get('search') || '');
 
+  const urlSearchVal = searchParams.get('search') || '';
+
+  useEffect(() => {
+    setSearchVal(urlSearchVal);
+  }, [urlSearchVal]);
+
+  // Autocomplete state
+  const [suggestions, setSuggestions] = useState([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const searchRef = useRef(null);
+  const debouncedSearch = useDebounce(searchVal.trim(), 300);
+
+  // Fetch suggestions
+  useEffect(() => {
+    if (debouncedSearch.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const fetchSuggestions = async () => {
+      setSuggestionsLoading(true);
+      try {
+        const { data } = await productApi.getProducts({ keyword: debouncedSearch, limit: 5 });
+        setSuggestions(data.data || []);
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    };
+
+    fetchSuggestions();
+  }, [debouncedSearch]);
+
+  // Close suggestions on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setSuggestions([]);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSuggestionClick = (productId) => {
+    setSuggestions([]);
+    setSearchVal('');
+    setSearchOpen(false);
+    setMenuOpen(false);
+    navigate(`/products/${productId}`);
+  };
+
+  const handleKeyDown = (e) => {
+    if (!suggestions.length) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex((prev) => Math.min(prev + 1, suggestions.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex((prev) => Math.max(prev - 1, -1));
+    } else if (e.key === 'Enter' && selectedIndex >= 0) {
+      e.preventDefault();
+      handleSuggestionClick(suggestions[selectedIndex]._id);
+    } else if (e.key === 'Escape') {
+      setSuggestions([]);
+    }
+  };
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+    if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+      handleSuggestionClick(suggestions[selectedIndex]._id);
+      return;
+    }
     if (searchVal.trim()) {
       navigate(`/?search=${encodeURIComponent(searchVal.trim())}`);
     } else {
       navigate('/');
     }
+    setSuggestions([]);
     setSearchOpen(false);
     setMenuOpen(false);
   };
 
   const handleSearchChange = (val) => {
     setSearchVal(val);
+    setSelectedIndex(-1);
     if (window.location.pathname === '/') {
       if (val.trim()) {
         navigate(`/?search=${encodeURIComponent(val)}`, { replace: true });
@@ -79,17 +159,64 @@ const Navbar = () => {
           <span>KOL <span className="text-primary">Store</span></span>
         </Link>
 
-        {/* Search Bar (Desktop) */}
-        <form onSubmit={handleSearchSubmit} className="hidden md:flex relative flex-1 max-w-xs lg:max-w-md mx-4">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-          <Input
-            type="search"
-            placeholder="Search products, brands..."
-            value={searchVal}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-9 h-9 w-full bg-secondary/50 border-border/60 focus:bg-background focus:ring-1 focus:ring-primary/20 duration-150"
-          />
-        </form>
+        {/* Search Bar (Desktop) with Autocomplete */}
+        <div ref={searchRef} className="hidden md:flex relative flex-1 max-w-xs lg:max-w-md mx-4">
+          <form onSubmit={handleSearchSubmit} className="w-full">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <Input
+                type="search"
+                placeholder="Search products, brands..."
+                value={searchVal}
+                onChange={(e) => { handleSearchChange(e.target.value); }}
+                onKeyDown={handleKeyDown}
+                onFocus={() => { if (suggestions.length) setSelectedIndex(-1); }}
+                className="pl-9 h-9 w-full bg-secondary/50 border-border/60 focus:bg-background focus:ring-1 focus:ring-primary/20 duration-150"
+              />
+            </div>
+          </form>
+
+          {/* Suggestions Dropdown */}
+          {debouncedSearch.length >= 2 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden">
+              {suggestionsLoading ? (
+                <div className="flex items-center justify-center gap-2 p-4 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Searching...
+                </div>
+              ) : suggestions.length > 0 ? (
+                <ul>
+                  {suggestions.map((product, idx) => (
+                    <li key={product._id}>
+                      <button
+                        type="button"
+                        onClick={() => handleSuggestionClick(product._id)}
+                        className={`flex items-center gap-3 w-full px-3 py-2.5 text-left hover:bg-secondary/80 transition-colors ${
+                          idx === selectedIndex ? 'bg-secondary' : ''
+                        }`}
+                      >
+                        <img
+                          src={product.image || 'https://placehold.co/40x40/e2e8f0/64748b?text=N/A'}
+                          alt={product.name}
+                          className="h-10 w-10 rounded-lg object-cover shrink-0 bg-secondary"
+                          onError={(e) => { e.target.src = 'https://placehold.co/40x40/e2e8f0/64748b?text=N/A'; }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{product.name}</p>
+                          <p className="text-xs text-muted-foreground">{formatPrice(product.price)}</p>
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                  No products found for &quot;{debouncedSearch}&quot;
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Desktop Nav */}
         <nav className="hidden items-center gap-6 md:flex">
