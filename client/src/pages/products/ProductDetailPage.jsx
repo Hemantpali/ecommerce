@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Badge } from '../../components/ui/badge';
 import { Select } from '../../components/ui/select';
 import { ArrowLeft, Heart, ShoppingCart, Star, MessageSquare } from 'lucide-react';
-import ( cn } from '../../utils/cn';
+import { cn } from '../../utils/cn';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
