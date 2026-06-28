@@ -113,7 +113,7 @@ const HomePage = () => {
       {/* Sub-sections Mode (Default landing page) */}
       {!isResultsMode && (
         <>
-          <PromoBanner />
+          <PromoBanner products={featuredProducts} />
 
           <ProductCarousel
             products={featuredProducts}
