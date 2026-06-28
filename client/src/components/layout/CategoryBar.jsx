@@ -7,14 +7,17 @@ const CategoryBar = ({ onToggleSidebar }) => {
   const { categories, loading } = useCategories();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get('category') || '';
+  const view = searchParams.get('view') || '';
   const navigate = useNavigate();
 
   const handleCategoryClick = (category) => {
     const newParams = new URLSearchParams(searchParams);
     if (category) {
       newParams.set('category', category);
+      newParams.delete('view');
     } else {
       newParams.delete('category');
+      newParams.set('view', 'all');
     }
     // Reset to page 1 when category changes
     newParams.set('page', '1');
@@ -56,7 +59,7 @@ const CategoryBar = ({ onToggleSidebar }) => {
           onClick={() => handleCategoryClick('')}
           className={cn(
             "text-xs font-semibold uppercase tracking-wider transition-all duration-200 hover:text-primary shrink-0 relative py-1.5",
-            !activeCategory
+            (view === 'all' && !activeCategory)
               ? "text-primary after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-primary after:rounded-full"
               : "text-muted-foreground"
           )}
